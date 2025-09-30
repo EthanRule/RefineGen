@@ -1,5 +1,14 @@
-export default function Footer() {
+"use client";
+
+import { signOut } from "next-auth/react";
+
+export default function Footer({
+  props,
+}: {
+  props: { status: string; session: any };
+}) {
   const currentYear = new Date().getFullYear();
+  const { status, session } = props;
 
   return (
     <footer className="bg-gray-900 text-white">
@@ -120,10 +129,18 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center">
+        <div className="border-t border-gray-800 mt-8 pt-8 flex justify-between items-center">
           <p className="text-gray-400">
             © {currentYear} TailorApply. All rights reserved.
           </p>
+          {session && (
+            <button
+              onClick={() => signOut()}
+              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm"
+            >
+              Sign Out
+            </button>
+          )}
         </div>
       </div>
     </footer>

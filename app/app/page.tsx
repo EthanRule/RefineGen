@@ -1,3 +1,6 @@
+"use client";
+
+import { useSession } from "next-auth/react";
 import Header from "./components/Header";
 import Footer from "./components/footer/Footer";
 import HeroSection from "./components/sections/HeroSection";
@@ -6,18 +9,17 @@ import FeaturesSection from "./components/sections/FeaturesSection";
 import PricingSection from "./components/sections/PricingSection";
 
 export default function Home() {
+  const { data: session, status } = useSession();
   return (
     <div className="min-h-screen bg-gray-800">
-      <Header />
-
+      <Header props={{ status, session }} />
       <main>
         <HeroSection />
         <VideoSection />
         <FeaturesSection />
         <PricingSection />
       </main>
-
-      <Footer />
+      <Footer props={{ status, session }} />
     </div>
   );
 }
