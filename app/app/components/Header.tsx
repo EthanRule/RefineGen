@@ -42,7 +42,7 @@ export default function Header() {
 
           {/* CTA Button */}
           <div className="hidden md:flex items-center space-x-4">
-            <button className="bg-white text-black border-2 border-black px-6 py-2 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2">
+            <button className="bg-white text-black border-2 border-black px-6 py-2 rounded-lg hover:bg-gray-100 hover:border-gray-400 hover:scale-105 transition-all duration-200 font-medium flex items-center gap-2">
               <img src="/github.png" alt="GitHub" className="w-5 h-5" />
               Sign up
             </button>
@@ -93,7 +93,7 @@ export default function Header() {
               >
                 Pricing
               </a>
-              <button className="block w-full text-left px-3 py-2 bg-white text-black border border-black rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center gap-2">
+              <button className="block w-full text-left px-3 py-2 bg-white text-black border border-black rounded-lg hover:bg-gray-100 hover:border-gray-400 hover:scale-105 transition-all duration-200 font-medium flex items-center gap-2">
                 <img src="/github.png" alt="GitHub" className="w-5 h-5" />
                 Sign up
               </button>

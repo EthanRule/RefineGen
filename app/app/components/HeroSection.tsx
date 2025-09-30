@@ -12,14 +12,6 @@ export default function HeroSection() {
             Connect your GitHub, paste a job posting, and get a tailored resume
             that highlights your relevant experience. Currently in development.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-blue-600 text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg">
-              Join Waitlist
-            </button>
-            <button className="border border-gray-300 text-gray-700 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-50 transition-colors">
-              Watch Demo
-            </button>
-          </div>
         </div>
       </div>
     </section>
