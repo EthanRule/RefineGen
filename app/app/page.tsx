@@ -1,9 +1,9 @@
 import Header from "./components/Header";
-import Footer from "./components/Footer";
-import HeroSection from "./components/HeroSection";
-import VideoSection from "./components/VideoSection";
-import FeaturesSection from "./components/FeaturesSection";
-import PricingSection from "./components/PricingSection";
+import Footer from "./components/footer/Footer";
+import HeroSection from "./components/sections/HeroSection";
+import VideoSection from "./components/sections/VideoSection";
+import FeaturesSection from "./components/sections/FeaturesSection";
+import PricingSection from "./components/sections/PricingSection";
 
 export default function Home() {
   return (

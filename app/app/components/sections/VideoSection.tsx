@@ -1,4 +1,4 @@
-import VideoPlaceholder from "./VideoPlaceholder";
+import VideoPlaceholder from "../ui/VideoPlaceholder";
 
 export default function VideoSection() {
   return (
