@@ -1,25 +1,18 @@
-import { NextAuthOptions } from "next-auth";
-import GitHubProvider from "next-auth/providers/github";
+
+import { NextAuthOptions, getServerSession } from "next-auth";
+import GithubProvider from "next-auth/providers/github";
+import { redirect } from "next/navigation";
 
 export const authConfig: NextAuthOptions = {
   providers: [
-    GitHubProvider({
-      clientId: process.env.GITHUB_ID!,
-      clientSecret: process.env.GITHUB_SECRET!,
+    GithubProvider({
+      clientId: process.env.GITHUB_ID as string,
+      clientSecret: process.env.GITHUB_SECRET as string,
     }),
   ],
-  callbacks: {
-    async session({ session, token }) {
-      if (token) {
-        session.user.id = token.sub!;
-      }
-      return session;
-    },
-    async jwt({ token, account, profile }) {
-      if (account) {
-        token.accessToken = account.access_token;
-      }
-      return token;
-    },
-  },
 };
+
+export async function LoginIsRequiredServer() {
+  const session = await getServerSession(authConfig);
+  if (!session) return redirect("/");
+}
