@@ -1,4 +1,27 @@
+"use client";
+
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import StartButtonLoading from "../ui/StartButtonLoading";
+
 export default function HeroSection() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  const handleStartClick = () => {
+    if (status === "loading") {
+      return; // Don't do anything while loading
+    }
+
+    if (session) {
+      // User is authenticated, go directly to tailor page
+      router.push("/tailor");
+    } else {
+      // User is not authenticated, redirect to sign in with callback
+      router.push("/api/auth/signin?callbackUrl=/tailor");
+    }
+  };
+
   return (
     <section className="relative py-20 lg:py-32 overflow-hidden">
       {/* Angled Grid Background */}
@@ -40,12 +63,16 @@ export default function HeroSection() {
             that highlights your relevant experience. Currently in development.
           </p>
           <div className="flex justify-center">
-            <a
-              href="/app"
-              className="bg-blue-600 text-white px-12 py-4 rounded-lg text-xl font-semibold hover:bg-blue-700 hover:scale-105 transition-all duration-200 shadow-lg"
-            >
-              Start
-            </a>
+            {status === "loading" ? (
+              <StartButtonLoading />
+            ) : (
+              <button
+                onClick={handleStartClick}
+                className="bg-blue-600 text-white px-12 py-4 rounded-lg text-xl font-semibold hover:bg-blue-700 hover:scale-105 transition-all duration-200 shadow-lg"
+              >
+                Start
+              </button>
+            )}
           </div>
         </div>
       </div>
