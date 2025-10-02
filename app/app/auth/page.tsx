@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Header from "@/app/components/Header";
 
-export default function AuthPage() {
+function AuthContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
@@ -129,5 +129,25 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+          <Header props={{ status: "unauthenticated", session: null }} />
+          <div className="flex items-center justify-center px-4 pt-16">
+            <div className="text-center">
+              <div className="animate-pulse bg-black rounded-lg w-40 h-12 mx-auto"></div>
+              <p className="text-gray-600 mt-4">Loading...</p>
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <AuthContent />
+    </Suspense>
   );
 }
