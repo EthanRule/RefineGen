@@ -1,19 +1,19 @@
 export default function FeaturesSection() {
   return (
-    <section id="features" className="py-20 bg-gray-50">
+    <section id="features" className="py-20 bg-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Built for developers, by developers
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
             We're building tools to help developers create better resumes by
             leveraging their existing GitHub projects and experience.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-white p-8 rounded-lg shadow-sm">
+          <div className="bg-gray-700 p-8 rounded-lg shadow-sm">
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
               <svg
                 className="w-6 h-6 text-blue-600"
@@ -29,16 +29,16 @@ export default function FeaturesSection() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            <h3 className="text-xl font-semibold text-white mb-4">
               GitHub Integration
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-300">
               Connect your GitHub account to analyze your repositories, commits,
               and contributions to understand your technical skills.
             </p>
           </div>
 
-          <div className="bg-white p-8 rounded-lg shadow-sm">
+          <div className="bg-gray-700 p-8 rounded-lg shadow-sm">
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6">
               <svg
                 className="w-6 h-6 text-green-600"
@@ -54,16 +54,16 @@ export default function FeaturesSection() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            <h3 className="text-xl font-semibold text-white mb-4">
               AI-Powered Analysis
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-300">
               AI analyzes job postings to identify key requirements and matches
               them with your GitHub projects and experience.
             </p>
           </div>
 
-          <div className="bg-white p-8 rounded-lg shadow-sm">
+          <div className="bg-gray-700 p-8 rounded-lg shadow-sm">
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-6">
               <svg
                 className="w-6 h-6 text-purple-600"
@@ -79,10 +79,10 @@ export default function FeaturesSection() {
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            <h3 className="text-xl font-semibold text-white mb-4">
               Instant Results
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-300">
               Generate a formatted, ATS-friendly resume tailored to each job
               posting quickly and efficiently.
             </p>

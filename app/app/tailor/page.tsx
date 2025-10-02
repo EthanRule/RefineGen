@@ -25,12 +25,11 @@ export default function Tailor() {
   const [jobDescription, setJobDescription] = useState<string>("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeText, setResumeText] = useState<string>("");
-  const [prompt, setPrompt] = useState<string>("");
   const [results, setResults] = useState<AnalysisResults | null>(null);
   const [error, setError] = useState<string>("");
   useEffect(() => {
     if (status === "unauthenticated") {
-      router.push("/");
+      router.push("/auth?callbackUrl=/tailor");
     }
   }, [status, router]);
 
@@ -57,7 +56,6 @@ export default function Tailor() {
         body: JSON.stringify({
           resume: resumeText,
           jobDescription,
-          prompt: prompt || undefined,
         }),
       });
 
@@ -82,14 +80,10 @@ export default function Tailor() {
     setJobDescription(value);
   };
 
-  const handlePromptChange = (value: string) => {
-    setPrompt(value);
-  };
-
   // Show loading state while checking authentication
   if (status === "loading") {
     return (
-      <div className="min-h-screen bg-gray-800">
+      <div className="min-h-screen bg-gray-700">
         <Header props={{ status, session }} />
         <main className="flex items-center justify-center min-h-[60vh]">
           <div className="text-center">
@@ -109,23 +103,22 @@ export default function Tailor() {
 
   // Show the tailor page for authenticated users
   return (
-    <div className="min-h-screen bg-gray-800">
+    <div className="h-screen bg-black flex flex-col overflow-hidden">
       <Header props={{ status, session }} />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="flex-1 flex mx-3 my-3">
         {/* Main Content Area */}
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="flex-1 bg-gray-600 rounded-lg shadow-lg p-6 flex border border-gray-500">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
             <ControlPanel
               onJobDescriptionChange={handleJobDescriptionChange}
               onResumeChange={handleResumeChange}
-              onPromptChange={handlePromptChange}
               onStart={handleStartAnalysis}
             />
 
             {/* Results Display */}
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 flex flex-col min-h-0">
               {results ? (
-                <div className="space-y-6">
+                <div className="flex-1 flex flex-col gap-4 overflow-auto">
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">
                       Gap Analysis Results
@@ -162,10 +155,10 @@ export default function Tailor() {
                         <span
                           className={`ml-2 px-2 py-1 rounded text-xs font-medium ${
                             results.gaps?.priority === "high"
-                              ? "bg-red-100 text-red-800"
+                              ? "bg-gray-200 text-gray-800"
                               : results.gaps?.priority === "medium"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-green-100 text-green-800"
+                              ? "bg-gray-300 text-gray-800"
+                              : "bg-gray-400 text-gray-800"
                           }`}
                         >
                           {results.gaps?.priority || "Unknown"}
@@ -189,7 +182,7 @@ export default function Tailor() {
                               <h4 className="font-medium text-gray-900">
                                 {project.projectName}
                               </h4>
-                              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                              <span className="text-xs bg-gray-200 text-gray-800 px-2 py-1 rounded">
                                 {Math.round(project.relevance * 100)}% relevant
                               </span>
                             </div>
@@ -212,7 +205,7 @@ export default function Tailor() {
                               href={project.githubUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-blue-600 text-sm hover:underline"
+                              className="text-gray-700 text-sm hover:underline"
                             >
                               View on GitHub →
                             </a>
@@ -223,13 +216,14 @@ export default function Tailor() {
                   </div>
                 </div>
               ) : (
-                <ResumeView />
+                <div className="flex-1 bg-gray-700 rounded-lg p-4 overflow-auto">
+                  <ResumeView />
+                </div>
               )}
             </div>
           </div>
         </div>
       </main>
-      <Footer props={{ status, session }} />
     </div>
   );
 }

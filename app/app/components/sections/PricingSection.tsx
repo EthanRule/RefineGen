@@ -1,12 +1,12 @@
 export default function PricingSection() {
   return (
-    <section id="pricing" className="py-20 bg-white">
+    <section id="pricing" className="py-20 bg-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Simple, transparent pricing
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
             Planned pricing structure for when we launch. Features and limits
             may change during development.
           </p>
@@ -294,42 +294,42 @@ export default function PricingSection() {
 
         {/* FAQ Section */}
         <div className="mt-20 text-center">
-          <h3 className="text-2xl font-bold text-gray-900 mb-8">
+          <h3 className="text-2xl font-bold text-white mb-8">
             Frequently Asked Questions
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto text-left">
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">
+              <h4 className="font-semibold text-white mb-2">
                 Can I change plans anytime?
               </h4>
-              <p className="text-gray-600">
+              <p className="text-gray-300">
                 Yes, you can upgrade or downgrade your plan at any time. Changes
                 take effect immediately.
               </p>
             </div>
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">
+              <h4 className="font-semibold text-white mb-2">
                 What happens if I exceed my limit?
               </h4>
-              <p className="text-gray-600">
+              <p className="text-gray-300">
                 We'll notify you when you're close to your limit. You can
                 upgrade anytime to continue generating resumes.
               </p>
             </div>
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">
+              <h4 className="font-semibold text-white mb-2">
                 Is there a free trial?
               </h4>
-              <p className="text-gray-600">
+              <p className="text-gray-300">
                 Yes! The Free plan is always available. Pro plans come with a
                 7-day free trial.
               </p>
             </div>
             <div>
-              <h4 className="font-semibold text-gray-900 mb-2">
+              <h4 className="font-semibold text-white mb-2">
                 Do you offer refunds?
               </h4>
-              <p className="text-gray-600">
+              <p className="text-gray-300">
                 We offer a 30-day money-back guarantee for all paid plans. No
                 questions asked.
               </p>

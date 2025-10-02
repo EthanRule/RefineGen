@@ -1,22 +1,11 @@
-import {
-  Document,
-  Packer,
-  Paragraph,
-  TextRun,
-  HeadingLevel,
-  AlignmentType,
-  UnderlineType,
-  Tab,
-  Table,
-  TableRow,
-  TableCell,
-  WidthType,
-  BorderStyle,
-} from "docx";
+import fs from "fs";
+import fsPromises from "fs/promises";
+import path from "path";
 
 interface TailoredResumeData {
-  originalContent: string;
-  tailoredContent: string;
+  docxFile: Buffer; // Raw DOCX file buffer
+  fileName: string;
+  jobDescription: string;
   gaps: {
     missingSkills: string[];
     experienceGaps: string[];
@@ -32,287 +21,140 @@ interface TailoredResumeData {
   }>;
 }
 
-export class DocxGenerator {
-  async generateTailoredResume(data: TailoredResumeData): Promise<Buffer> {
-    try {
-      // Create the document with proper formatting
-      const doc = new Document({
-        sections: [
-          {
-            properties: {},
-            children: await this.createResumeContent(data),
-          },
-        ],
-      });
+interface TailoredDocxResult {
+  tailoredDocx: Buffer;
+  summary: string;
+  changes: string[];
+}
 
-      // Generate the DOCX buffer
-      const buffer = await Packer.toBuffer(doc);
-      return buffer;
+export default class DocxGenerator {
+  private openai: any;
+
+  constructor() {
+    const { OpenAI } = require("openai");
+    this.openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+
+  async generateTailoredResume(
+    data: TailoredResumeData
+  ): Promise<TailoredDocxResult> {
+    try {
+      // Save DOCX file temporarily for OpenAI
+      const tempFilePath = await this.saveTempDocx(
+        data.docxFile,
+        data.fileName
+      );
+
+      try {
+        // Send DOCX file to OpenAI with instructions
+        const response = await this.openai.files.create({
+          file: fs.createReadStream(tempFilePath),
+          purpose: "assistants",
+        });
+
+        const completion = await this.openai.chat.completions.create({
+          model: "gpt-4o", // Use vision-capable model for DOCX
+          messages: [
+            {
+              role: "user",
+              content: [
+                {
+                  type: "text",
+                  text: this.createPrompt(
+                    data.jobDescription,
+                    data.gaps,
+                    data.gapFillers
+                  ),
+                },
+                {
+                  type: "file_url",
+                  file_url: {
+                    url: `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,${data.docxFile.toString(
+                      "base64"
+                    )}`,
+                    filename: data.fileName,
+                  },
+                },
+              ],
+            },
+          ],
+          max_tokens: 4000,
+        });
+
+        // For now, return the original file with instructions
+        // In production, you'd need OpenAI's assistants API to modify files
+        return {
+          tailoredDocx: data.docxFile,
+          summary:
+            completion.choices[0]?.message?.content || "Analysis completed",
+          changes: [
+            `Identified ${data.gaps.missingSkills.length} missing skills`,
+            `Found ${data.gapFillers.length} relevant GitHub projects`,
+            `Priority level: ${data.gaps.priority}`,
+          ],
+        };
+      } finally {
+        // Clean up temp file
+        await fsPromises.unlink(tempFilePath).catch(console.error);
+      }
     } catch (error) {
-      console.error("Error generating DOCX:", error);
+      console.error("Error generating tailored DOCX:", error);
       throw new Error("Failed to generate tailored resume");
     }
   }
 
-  private async createResumeContent(
-    data: TailoredResumeData
-  ): Promise<Paragraph[]> {
-    const content: Paragraph[] = [];
+  private createPrompt(
+    jobDescription: string,
+    gaps: any,
+    gapFillers: any[]
+  ): string {
+    return `
+Please analyze this DOCX resume and provide tailored improvements for this job description:
 
-    // Try to extract and preserve the original structure
-    const originalStructure = this.parseOriginalStructure(data.originalContent);
+JOB DESCRIPTION:
+${jobDescription}
 
-    // Generate the tailored content
-    const tailoredStructure = this.generateTailoredStructure(
-      data,
-      originalStructure
-    );
+GAPS ANALYSIS:
+- Missing Skills: ${gaps.missingSkills.join(", ")}
+- Experience Gaps: ${gaps.experienceGaps.join(", ")}
+- Keyword Gaps: ${gaps.keywordGaps.join(", ")}
+- Priority: ${gaps.priority}
 
-    // Convert structure to DOCX paragraphs
-    content.push(...tailoredStructure);
+RELEVANT GITHUB PROJECTS:
+${gapFillers
+  .map(
+    (project) =>
+      `- ${project.projectName} (${Math.round(
+        project.relevance * 100
+      )}% relevant): ${project.description.substring(0, 100)}...`
+  )
+  .join("\n")}
 
-    return content;
+Please provide:
+1. Specific resume improvements tailored to this job
+2. Skills/keywords to emphasize
+3. Projects to highlight with descriptions
+4. Any formatting or structure recommendations
+
+Focus on making the resume explicitly match the job requirements while maintaining professionalism.
+`;
   }
 
-  private parseOriginalStructure(originalContent: string): any {
-    // Parse the original DOCX structure
-    // This is a simplified version - you could enhance this with better parsing
-    const lines = originalContent.split("\n");
-    const structure = {
-      contact: [] as string[],
-      objective: [] as string[],
-      experience: [] as string[],
-      education: [] as string[],
-      skills: [] as string[],
-    };
-
-    let currentSection = "contact";
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-      if (!trimmedLine) continue;
-
-      if (this.isSectionHeader(trimmedLine)) {
-        currentSection = this.identifySection(trimmedLine);
-      } else {
-        structure[currentSection as keyof typeof structure].push(trimmedLine);
-      }
-    }
-
-    return structure;
-  }
-
-  private generateTailoredStructure(
-    data: TailoredResumeData,
-    originalStructure: any
-  ): Paragraph[] {
-    const paragraphs: Paragraph[] = [];
-
-    // Add contact section
-    if (originalStructure.contact.length > 0) {
-      paragraphs.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: originalStructure.contact[0],
-              bold: true,
-              size: 24,
-            }),
-          ],
-          alignment: AlignmentType.CENTER,
-        })
-      );
-
-      if (originalStructure.contact.length > 1) {
-        for (let i = 1; i < originalStructure.contact.length; i++) {
-          paragraphs.push(
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: originalStructure.contact[i],
-                  size: 12,
-                }),
-              ],
-              alignment: AlignmentType.CENTER,
-            })
-          );
-        }
-      }
-    }
-
-    // Add tailored content sections
-    paragraphs.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: "TAILORED RESUME",
-            bold: true,
-            size: 20,
-            underline: UnderlineType.SINGLE,
-          }),
-        ],
-        alignment: AlignmentType.CENTER,
-        spacing: { after: 400 },
-      })
+  private async saveTempDocx(
+    buffer: Buffer,
+    fileName: string
+  ): Promise<string> {
+    const tempDir = "/tmp";
+    const fileExt = path.extname(fileName);
+    const baseName = path.basename(fileName, fileExt);
+    const tempFilePath = path.join(
+      tempDir,
+      `${baseName}_${Date.now()}${fileExt}`
     );
 
-    paragraphs.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: "Key Improvements Made:",
-            bold: true,
-            size: 14,
-          }),
-        ],
-        spacing: { after: 200 },
-      })
-    );
-
-    // Add missing skills that were addressed
-    if (data.gaps.missingSkills.length > 0) {
-      paragraphs.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: "Skills Added:",
-              bold: true,
-              size: 12,
-            }),
-          ],
-        })
-      );
-
-      for (const skill of data.gaps.missingSkills.slice(0, 5)) {
-        // Limit to 5 skills
-        paragraphs.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "• " + skill,
-                size: 11,
-              }),
-            ],
-            indent: { left: 400 },
-          })
-        );
-      }
-    }
-
-    paragraphs.push(new Paragraph({ children: [new TextRun({ text: "" })] }));
-
-    // Add project recommendations
-    if (data.gapFillers.length > 0) {
-      paragraphs.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: "Recommended Projects to Highlight:",
-              bold: true,
-              size: 12,
-            }),
-          ],
-        })
-      );
-
-      for (const project of data.gapFillers.slice(0, 3)) {
-        // Limit to 3 projects
-        paragraphs.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text:
-                  "• " +
-                  project.projectName +
-                  " (" +
-                  Math.round(project.relevance * 100) +
-                  "% relevant)",
-                bold: true,
-                size: 11,
-              }),
-            ],
-            indent: { left: 400 },
-          })
-        );
-
-        paragraphs.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "  " + project.description.substring(0, 100) + "...",
-                size: 10,
-                italics: true,
-              }),
-            ],
-            indent: { left: 400 },
-          })
-        );
-      }
-    }
-
-    // Add the original resume content (tailored)
-    if (data.tailoredContent) {
-      paragraphs.push(new Paragraph({ children: [new TextRun({ text: "" })] }));
-      paragraphs.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: "UPDATED RESUME CONTENT",
-              bold: true,
-              size: 14,
-              underline: UnderlineType.SINGLE,
-            }),
-          ],
-        })
-      );
-
-      // Add the tailored content
-      const tailoredLines = data.tailoredContent.split("\n");
-      for (const line of tailoredLines.slice(0, 50)) {
-        // Limit content to stay on page
-        if (line.trim()) {
-          paragraphs.push(
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: line,
-                  size: 10,
-                }),
-              ],
-            })
-          );
-        }
-      }
-    }
-
-    return paragraphs;
-  }
-
-  private isSectionHeader(text: string): boolean {
-    const headers = [
-      "EXPERIENCE",
-      "WORK EXPERIENCE",
-      "EDUCATION",
-      "SKILLS",
-      "TECHNICAL SKILLS",
-      "PROJECTS",
-      "SUMMARY",
-      "OBJECTIVE",
-    ];
-    return headers.some(
-      (header) =>
-        text.toUpperCase().includes(header) || text.toUpperCase() === header
-    );
-  }
-
-  private identifySection(text: string): string {
-    const upperText = text.toUpperCase();
-    if (upperText.includes("EXPERIENCE") || upperText.includes("WORK"))
-      return "experience";
-    if (upperText.includes("EDUCATION")) return "education";
-    if (upperText.includes("SKILL")) return "skills";
-    if (upperText.includes("PROJECT")) return "projects";
-    if (upperText.includes("SUMMARY") || upperText.includes("OBJECTIVE"))
-      return "objective";
-    return "experience"; // default
+    await fsPromises.writeFile(tempFilePath, buffer);
+    return tempFilePath;
   }
 }

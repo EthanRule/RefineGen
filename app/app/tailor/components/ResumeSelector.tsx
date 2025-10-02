@@ -73,14 +73,14 @@ export default function ResumeSelector({
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
-        <label className="block text-sm font-medium text-black">
-          Resume Upload (DOCX Only)
+        <label className="block text-sm font-medium text-white">
+          Resume Upload (docx)
         </label>
         <a
           href="https://www.adobe.com/acrobat/online/pdf-to-word.html"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs text-blue-600 hover:text-blue-800 underline ml-2 whitespace-nowrap"
+          className="text-xs text-blue-500 hover:text-gray-800 underline ml-2 whitespace-nowrap"
         >
           Convert PDF →
         </a>
@@ -96,14 +96,14 @@ export default function ResumeSelector({
             disabled={isParsing}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
           />
-          <div className="w-full px-3 py-6 border-2 border-dashed border-gray-400 rounded-lg bg-gray-50 text-center hover:border-gray-500 transition-colors">
+          <div className="w-full px-3 py-6 border-2 border-dashed border-gray-500 rounded-lg bg-gray-700 text-center hover:border-gray-400 transition-colors">
             {isParsing ? (
-              <div className="text-gray-600">
-                <div className="w-8 h-8 mx-auto mb-2 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="text-gray-300">
+                <div className="w-8 h-8 mx-auto mb-2 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
                 <p className="text-sm">Parsing DOCX...</p>
               </div>
             ) : (
-              <div className="text-gray-600">
+              <div className="text-gray-300">
                 <svg
                   className="mx-auto h-12 w-12 mb-2"
                   fill="none"
@@ -120,17 +120,17 @@ export default function ResumeSelector({
                 <p className="text-sm font-medium">
                   Click to upload DOCX resume
                 </p>
-                <p className="text-xs text-gray-500 mt-1">DOCX files only</p>
+                <p className="text-xs text-gray-400 mt-1">DOCX files only</p>
               </div>
             )}
           </div>
         </div>
       ) : (
-        <div className="w-full px-3 py-3 border border-gray-300 rounded-lg bg-green-50">
+        <div className="w-full px-3 py-3 border border-gray-500 rounded-lg bg-gray-700">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-2">
               <svg
-                className="h-5 w-5 text-green-600"
+                className="h-5 w-5 text-gray-300"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -143,10 +143,10 @@ export default function ResumeSelector({
                 />
               </svg>
               <div>
-                <p className="text-sm font-medium text-black">
+                <p className="text-sm font-medium text-white">
                   DOCX Successfully Uploaded
                 </p>
-                <p className="text-xs text-gray-600">
+                <p className="text-xs text-gray-400">
                   {resumeText.length} characters extracted
                 </p>
               </div>
@@ -154,7 +154,7 @@ export default function ResumeSelector({
             <button
               onClick={handleRemoveFile}
               disabled={isParsing}
-              className="text-red-600 hover:text-red-800 disabled:opacity-50"
+              className="text-gray-700 hover:text-gray-800 disabled:opacity-50"
             >
               <svg
                 className="h-4 w-4"

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useSession, signOut } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import HeaderLogo from "./header/HeaderLogo";
 import HeaderNavigation from "./header/HeaderNavigation";
 import HeaderButton from "./header/HeaderButton";
@@ -16,22 +17,22 @@ export default function Header({
 }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { data: session, status } = useSession();
+  const pathname = usePathname();
+  const isAuthPage = pathname === "/auth";
 
   return (
-    <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <HeaderLogo />
 
-          <HeaderNavigation />
+          <HeaderNavigation isAuthPage={isAuthPage} />
 
           {/* User Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            {status === "loading" ? (
-              <LoadingCard />
-            ) : session ? (
+            {session ? (
               <div className="flex items-center space-x-3">
-                <span className="text-gray-700">
+                <span className="text-gray-300">
                   {session.user?.name || session.user?.email}
                 </span>
                 {session.user?.image && (
@@ -43,10 +44,12 @@ export default function Header({
                 )}
               </div>
             ) : (
-              <HeaderButton href="/api/auth/signin">
-                <img src="/github.png" alt="GitHub" className="w-5 h-5" />
-                Sign up
-              </HeaderButton>
+              !isAuthPage && (
+                <HeaderButton href="/auth">
+                  <img src="/github.png" alt="GitHub" className="w-5 h-5" />
+                  Sign up
+                </HeaderButton>
+              )
             )}
           </div>
 

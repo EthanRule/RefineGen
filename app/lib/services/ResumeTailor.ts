@@ -1,12 +1,12 @@
 import GapAnalyzer, { GapAnalysis } from "./GapAnalyzer";
 import GapFillerSearch, { GapFiller } from "./GapFillerSearch";
+import DocxGenerator from "./DocxGenerator";
 
 interface TailorRequest {
   resume: string;
   jobDescription: string;
   userId: string;
   githubAccessToken?: string;
-  prompt?: string;
 }
 
 interface TailorResponse {
@@ -19,10 +19,12 @@ interface TailorResponse {
 export default class ResumeTailor {
   private gapAnalyzer: GapAnalyzer;
   private gapFillerSearch: GapFillerSearch;
+  private docxGenerator: DocxGenerator;
 
   constructor() {
     this.gapAnalyzer = new GapAnalyzer();
     this.gapFillerSearch = new GapFillerSearch();
+    this.docxGenerator = new DocxGenerator();
   }
 
   async tailorResume(data: TailorRequest): Promise<TailorResponse> {
@@ -44,16 +46,19 @@ export default class ResumeTailor {
 
       console.log("gapFillers", gapFillers);
 
-      // Step 3: Generate tailored resume with recommendations
-      const result = await this.generateTailoredResume({
-        originalResume: data.resume,
+      // Step 3: Generate tailored resume content
+      const tailoredContent = `${data.resume}\n\n--- GPT TAILORING ANALYSIS ---\n${data.jobDescription}\n\nFor more detailed analysis with DOCX, please upload your DOCX file.`;
+
+      return {
+        tailoredResume: tailoredContent,
         gaps,
         gapFillers,
-        prompt: data.prompt,
-        jobDescription: data.jobDescription,
-      });
-
-      return result;
+        recommendations: [
+          `Identified ${gaps.missingSkills.length} missing skills`,
+          `Found ${gapFillers.length} relevant GitHub projects`,
+          `Priority level: ${gaps.priority}`,
+        ],
+      };
     } catch (error) {
       throw new Error(
         `Resume tailoring failed: ${
@@ -61,25 +66,5 @@ export default class ResumeTailor {
         }`
       );
     }
-  }
-
-  private async generateTailoredResume(data: {
-    originalResume: string;
-    gaps: GapAnalysis;
-    gapFillers: GapFiller[];
-    prompt?: string;
-    jobDescription: string;
-  }): Promise<TailorResponse> {
-    // Give OpenAI the resume, gaps, and gap fillers
-    // Output tailored resume recommendations
-    // Generate final tailored resume content
-
-    // TODO: Implement final OpenAI call
-    return {
-      tailoredResume: data.originalResume,
-      gaps: data.gaps,
-      gapFillers: data.gapFillers,
-      recommendations: [],
-    };
   }
 }

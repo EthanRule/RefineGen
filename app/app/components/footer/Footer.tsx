@@ -17,7 +17,7 @@ export default function Footer({
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
             <h3 className="text-2xl font-bold mb-4">
-              <span className="text-blue-400">Tailor</span>Apply
+              <span className="text-gray-400">Tailor</span>Apply
             </h3>
             <p className="text-gray-400 mb-4 max-w-md">
               AI-powered resume tailoring for developers. Connect your GitHub,
@@ -136,7 +136,7 @@ export default function Footer({
           {session && (
             <button
               onClick={() => signOut()}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors text-sm"
+              className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors text-sm"
             >
               Sign Out
             </button>

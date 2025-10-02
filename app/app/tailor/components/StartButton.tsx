@@ -26,7 +26,7 @@ export default function StartButton({ onStart }: StartButtonProps) {
         className={`w-full px-6 py-3 rounded-lg font-semibold transition-colors ${
           isLoading
             ? "bg-gray-400 cursor-not-allowed"
-            : "bg-blue-600 hover:bg-blue-700"
+            : "bg-gray-700 hover:bg-gray-800"
         } text-white`}
       >
         {isLoading ? (

@@ -10,7 +10,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { resume, jobDescription, prompt } = await request.json();
+    const { resume, jobDescription } = await request.json();
 
     const resumeTailor = new ResumeTailor();
 
@@ -19,7 +19,6 @@ export async function POST(request: Request) {
       jobDescription,
       userId: session.user?.email || "",
       githubAccessToken: session.accessToken, // This is your GitHub token!
-      prompt,
     });
 
     return Response.json(result);

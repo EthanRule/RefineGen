@@ -11,7 +11,7 @@ import PricingSection from "./components/sections/PricingSection";
 export default function Home() {
   const { data: session, status } = useSession();
   return (
-    <div className="min-h-screen bg-gray-800">
+    <div className="min-h-screen bg-gray-900">
       <Header props={{ status, session }} />
       <main>
         <HeroSection />

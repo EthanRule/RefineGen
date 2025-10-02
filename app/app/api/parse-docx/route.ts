@@ -16,28 +16,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Convert file to buffer
-    const buffer = await file.arrayBuffer();
-    const uint8Array = new Uint8Array(buffer);
-
-    // Parse DOCX to HTML/structured text
-    const mammoth = await import("mammoth");
-    const result = await mammoth.convertToHtml({ buffer: uint8Array });
-    const text = await mammoth.extractRawText({ buffer: uint8Array });
-
+    // Return file info - OpenAI will handle the DOCX parsing directly
     return NextResponse.json({
-      text: text.value,
-      html: result.value,
-      messages: result.messages,
       fileName: file.name,
+      fileSize: file.size,
       success: true,
+      message: "DOCX file ready for OpenAI processing",
     });
   } catch (error) {
-    console.error("DOCX parsing error:", error);
+    console.error("File validation error:", error);
     return NextResponse.json(
       {
-        error:
-          "Failed to parse DOCX file. Please try again or upload a different file.",
+        error: "Failed to validate DOCX file. Please try again.",
       },
       { status: 500 }
     );
