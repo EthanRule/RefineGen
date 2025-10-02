@@ -10,10 +10,11 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "copy-webpack-plugin": "^13.0.1",
     "dotenv": "^17.2.3",
     "next": "15.5.4",
     "next-auth": "^4.24.11",
-    "pdf-parse": "^2.1.1",
+    "openai": "^6.0.1",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },

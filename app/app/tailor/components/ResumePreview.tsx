@@ -2,7 +2,7 @@ export default function ResumePreview() {
   return (
     <div className="flex-1 bg-gray-50 rounded-lg p-6 border-2 border-dashed border-gray-300">
       <div className="h-full flex items-center justify-center">
-        <div className="text-center text-gray-500">
+        <div className="text-center text-gray-700">
           <svg
             className="mx-auto h-16 w-16 mb-4"
             fill="none"
