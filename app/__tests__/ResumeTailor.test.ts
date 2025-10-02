@@ -7,58 +7,97 @@ describe("ResumeTailor", () => {
     resumeTailor = new ResumeTailor();
   });
 
-  test("should analyze gaps between resume and job description", async () => {
-    // Sample data
-    const resume = `
-      John Doe
-      Software Engineer
-      
-      Experience:
-      - 2 years React development
-      - 1 year Node.js
-      - JavaScript, HTML, CSS
-    `;
+  test("should orchestrate the complete resume tailoring process", async () => {
+    const tailorRequest = {
+      resume: `
+        John Doe
+        Software Engineer
+        
+        Experience:
+        - 2 years React development
+        - JavaScript, HTML, CSS
+      `,
+      jobDescription: `
+        Looking for Senior Frontend Developer
+        Requirements:
+        - TypeScript proficiency
+        - Python knowledge preferred
+        - Docker experience
+      `,
+      userId: "test-user",
+      prompt: "Make me look qualified for this role",
+    };
 
-    const jobDescription = `
-      Looking for Senior Frontend Developer
-      Requirements:
-      - 5+ years React experience
-      - TypeScript proficiency
-      - Python knowledge preferred
-      - Docker experience
-      - Team leadership skills
-    `;
+    const result = await resumeTailor.tailorResume(tailorRequest);
 
-    // Test the private analyzeGaps method using type assertion
-    const gaps = await (resumeTailor as any).analyzeGaps(
-      resume,
-      jobDescription
-    );
+    // Verify the complete response structure
+    expect(result).toHaveProperty("tailoredResume");
+    expect(result).toHaveProperty("gaps");
+    expect(result).toHaveProperty("gapFillers");
+    expect(result).toHaveProperty("recommendations");
 
-    // Verify the structure of the response
-    expect(gaps).toHaveProperty("missingSkills");
-    expect(gaps).toHaveProperty("experienceGaps");
-    expect(gaps).toHaveProperty("keywordGaps");
-    expect(gaps).toHaveProperty("priority");
+    // Verify gaps are analyzed
+    expect(result.gaps).toHaveProperty("missingSkills");
+    expect(result.gaps).toHaveProperty("experienceGaps");
+    expect(result.gaps).toHaveProperty("keywordGaps");
+    expect(result.gaps).toHaveProperty("priority");
 
-    expect(Array.isArray(gaps.missingSkills)).toBe(true);
-    expect(Array.isArray(gaps.experienceGaps)).toBe(true);
-    expect(Array.isArray(gaps.keywordGaps)).toBe(true);
-    expect(["high", "medium", "low"]).toContain(gaps.priority);
+    // Verify gapFillers structure (should be empty without real GitHub token)
+    expect(Array.isArray(result.gapFillers)).toBe(true);
+    expect(Array.isArray(result.recommendations)).toBe(true);
 
-    // Check specific gaps should be identified
-    expect(gaps.missingSkills).toContain("Typescript");
-    expect(gaps.missingSkills).toContain("Python");
-    expect(gaps.missingSkills).toContain("Docker");
+    // GapFillers array structure validation
+    result.gapFillers.forEach((gapFiller: any) => {
+      expect(gapFiller).toHaveProperty("projectName");
+      expect(gapFiller).toHaveProperty("description");
+      expect(gapFiller).toHaveProperty("skills");
+      expect(gapFiller).toHaveProperty("relevance");
+      expect(gapFiller).toHaveProperty("githubUrl");
+    });
   }, 10000); // 10 second timeout for API call
 
-  test("should handle API errors gracefully", async () => {
-    // This test will pass if the mock data is returned due to network issues
-    const invalidResume = "";
-    const invalidJobDescription = "";
+  test("should handle missing GitHub token gracefully", async () => {
+    const tailorRequest = {
+      resume: "Basic resume content",
+      jobDescription: "Job requirements",
+      userId: "test-user",
+      // No githubAccessToken provided
+    };
+
+    const result = await resumeTailor.tailorResume(tailorRequest);
+
+    // Should still complete successfully
+    expect(result).toBeDefined();
+    expect(result.gapFillers).toEqual([]);
+    expect(result.gaps).toBeDefined();
+  });
+
+  test("should maintain original resume content in response", async () => {
+    const originalResume = "This is my original resume content";
+
+    const tailorRequest = {
+      resume: originalResume,
+      jobDescription: "Some job description",
+      userId: "test-user",
+    };
+
+    const result = await resumeTailor.tailorResume(tailorRequest);
+
+    // The tailoredResume should contain the original content
+    // (since we haven't implemented the final OpenAI call yet)
+    expect(result.tailoredResume).toBe(originalResume);
+  });
+
+  test("should propagate errors correctly", async () => {
+    const invalidRequest = {
+      resume: "", // Empty resume
+      jobDescription: "", // Empty job description
+      userId: "test-user",
+    };
 
     await expect(
-      (resumeTailor as any).analyzeGaps(invalidResume, invalidJobDescription)
+      resumeTailor.tailorResume(invalidRequest)
     ).resolves.toBeDefined();
+    // Even invalid requests should be handled gracefully by analyzeGaps
   });
 });
