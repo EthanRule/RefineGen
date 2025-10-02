@@ -40,6 +40,10 @@ export default class ResumeTailor {
         data.githubAccessToken
       );
 
+      console.log("gaps", gaps);
+
+      console.log("gapFillers", gapFillers);
+
       // Step 3: Generate tailored resume with recommendations
       const result = await this.generateTailoredResume({
         originalResume: data.resume,

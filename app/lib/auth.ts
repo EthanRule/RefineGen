@@ -9,7 +9,7 @@ export const authConfig: NextAuthOptions = {
       clientSecret: process.env.GITHUB_SECRET as string,
       authorization: {
         params: {
-          scope: "read:user user:email repo", // Added repo scope
+          scope: "read:user user:email public_repo", // Changed to public_repo for read-only access
         },
       },
     }),

@@ -33,8 +33,13 @@ export default class GapFillerSearch {
   }
 
   private async fetchUserRepos(accessToken: string): Promise<any[]> {
+    // Only fetch public repositories to respect user privacy
+    console.log(
+      "🔍 TailorApply: Analyzing public repositories only - this is read-only access"
+    );
+
     const response = await fetch(
-      "https://api.github.com/user/repos?sort=updated&per_page=30",
+      "https://api.github.com/user/repos?visibility=public&sort=updated&per_page=30",
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -54,6 +59,7 @@ export default class GapFillerSearch {
     return repos
       .filter((repo: any) => repo.size < 50000) // Skip massive repos
       .filter((repo: any) => repo.language || repo.description) // Must have identifiable info
+      .filter((repo: any) => !repo.fork) // Skip forked repositories (focus on original work)
       .slice(0, 15); // Top 15 most recent
   }
 
