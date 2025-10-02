@@ -16,25 +16,30 @@ export default function ResumeSelector({
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
-    if (!file || file.type !== "application/pdf") {
-      alert("Please upload a PDF file");
+    if (
+      !file ||
+      (!file.name.toLowerCase().endsWith(".docx") &&
+        file.type !==
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    ) {
+      alert("Please upload a DOCX file (.docx)");
       return;
     }
 
     setIsParsing(true);
 
     try {
-      // Parse PDF server-side
+      // Parse DOCX server-side
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("/api/parse-pdf", {
+      const response = await fetch("/api/parse-docx", {
         method: "POST",
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to parse PDF: ${response.statusText}`);
+        throw new Error(`Failed to parse DOCX: ${response.statusText}`);
       }
 
       const data = await response.json();
@@ -43,11 +48,11 @@ export default function ResumeSelector({
       setResumeText(text);
       onResumeChange?.(file, text);
     } catch (error) {
-      console.error("Error parsing PDF:", error);
+      console.error("Error parsing DOCX:", error);
       alert(
         error instanceof Error
           ? error.message
-          : "Error parsing PDF. Please try again."
+          : "Error parsing DOCX. Please try again."
       );
     } finally {
       setIsParsing(false);
@@ -58,7 +63,7 @@ export default function ResumeSelector({
     setResumeText("");
     onResumeChange?.(null, "");
     const fileInput = document.getElementById(
-      "resume-pdf-upload"
+      "resume-docx-upload"
     ) as HTMLInputElement;
     if (fileInput) {
       fileInput.value = "";
@@ -67,16 +72,26 @@ export default function ResumeSelector({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-black mb-2">
-        Resume Upload (PDF Only)
-      </label>
+      <div className="flex items-center justify-between mb-2">
+        <label className="block text-sm font-medium text-black">
+          Resume Upload (DOCX Only)
+        </label>
+        <a
+          href="https://www.adobe.com/acrobat/online/pdf-to-word.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-blue-600 hover:text-blue-800 underline ml-2 whitespace-nowrap"
+        >
+          Convert PDF →
+        </a>
+      </div>
 
       {!resumeText ? (
         <div className="relative">
           <input
-            id="resume-pdf-upload"
+            id="resume-docx-upload"
             type="file"
-            accept=".pdf"
+            accept=".docx"
             onChange={handleFileUpload}
             disabled={isParsing}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
@@ -85,7 +100,7 @@ export default function ResumeSelector({
             {isParsing ? (
               <div className="text-gray-600">
                 <div className="w-8 h-8 mx-auto mb-2 border-2 border-gray-600 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm">Parsing PDF...</p>
+                <p className="text-sm">Parsing DOCX...</p>
               </div>
             ) : (
               <div className="text-gray-600">
@@ -103,9 +118,9 @@ export default function ResumeSelector({
                   />
                 </svg>
                 <p className="text-sm font-medium">
-                  Click to upload PDF resume
+                  Click to upload DOCX resume
                 </p>
-                <p className="text-xs text-gray-500 mt-1">PDF files only</p>
+                <p className="text-xs text-gray-500 mt-1">DOCX files only</p>
               </div>
             )}
           </div>
@@ -129,7 +144,7 @@ export default function ResumeSelector({
               </svg>
               <div>
                 <p className="text-sm font-medium text-black">
-                  PDF Successfully Uploaded
+                  DOCX Successfully Uploaded
                 </p>
                 <p className="text-xs text-gray-600">
                   {resumeText.length} characters extracted
