@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -29,8 +29,14 @@ export default function AuthPage() {
     );
   }
 
+  // Redirect authenticated users
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push(callbackUrl);
+    }
+  }, [status, callbackUrl, router]);
+
   if (status === "authenticated") {
-    router.push(callbackUrl);
     return null;
   }
 

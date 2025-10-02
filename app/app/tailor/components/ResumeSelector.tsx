@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 
 interface ResumeSelectorProps {
@@ -72,18 +73,18 @@ export default function ResumeSelector({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-2">
-        <label className="block text-sm font-medium text-white">
-          Resume Upload (docx)
+      <div className="relative mb-2">
+        <label className="block text-center text-sm font-bold text-white">
+          Resume Upload
         </label>
-        <a
+        <Link
           href="https://www.adobe.com/acrobat/online/pdf-to-word.html"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xs text-blue-500 hover:text-gray-800 underline ml-2 whitespace-nowrap"
+          className="absolute top-0 right-0 px-3 py-1 text-xs font-medium text-white bg-gradient-to-r from-orange-500 to-blue-500 hover:from-orange-600 hover:to-blue-600 rounded-full shadow-sm transition-all duration-200 whitespace-nowrap"
         >
-          Convert PDF →
-        </a>
+          .pdf → .docx
+        </Link>
       </div>
 
       {!resumeText ? (
@@ -96,31 +97,28 @@ export default function ResumeSelector({
             disabled={isParsing}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
           />
-          <div className="w-full px-3 py-6 border-2 border-dashed border-gray-500 rounded-lg bg-gray-700 text-center hover:border-gray-400 transition-colors">
+          <div className="w-full px-3 py-6 border-2 border-dashed border-gray-500 rounded-lg bg-zinc-700 text-center hover:border-gray-400 transition-colors">
             {isParsing ? (
               <div className="text-gray-300">
-                <div className="w-8 h-8 mx-auto mb-2 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm">Parsing DOCX...</p>
+                <div className="flex justify-center items-center mb-2">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"></div>
+                    <div
+                      className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.1s" }}
+                    ></div>
+                    <div
+                      className="w-2 h-2 bg-gray-300 rounded-full animate-bounce"
+                      style={{ animationDelay: "0.2s" }}
+                    ></div>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="text-gray-300">
-                <svg
-                  className="mx-auto h-12 w-12 mb-2"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 8.98M17 12l-4 4-4 4"
-                  />
-                </svg>
                 <p className="text-sm font-medium">
-                  Click to upload DOCX resume
+                  Click to upload .docx resume
                 </p>
-                <p className="text-xs text-gray-400 mt-1">DOCX files only</p>
               </div>
             )}
           </div>
