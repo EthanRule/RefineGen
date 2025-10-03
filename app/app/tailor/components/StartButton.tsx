@@ -25,8 +25,8 @@ export default function StartButton({ onStart }: StartButtonProps) {
         disabled={isLoading}
         className={`w-full px-6 py-3 rounded-lg font-semibold transition-colors ${
           isLoading
-            ? "bg-teal-600 cursor-not-allowed"
-            : "bg-teal-700 hover:bg-teal-800"
+            ? "bg-purple-600 cursor-not-allowed"
+            : "bg-purple-800 hover:bg-purple-900"
         } text-white`}
       >
         {isLoading ? (
@@ -35,7 +35,7 @@ export default function StartButton({ onStart }: StartButtonProps) {
             <span>Processing...</span>
           </div>
         ) : (
-          "Start Analysis"
+          "Generate Image"
         )}
       </button>
     </div>

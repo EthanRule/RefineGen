@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { writeFile } from "fs/promises";
+import { join } from "path";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,20 +18,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // For now, return a placeholder text since we need proper DOCX parsing
-    // In production, you'd use a library like mammoth.js to parse DOCX content
+    // Store the DOCX file temporarily for OpenAI to process
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    // Create temp directory if it doesn't exist
+    const tempDir = "/tmp";
+    const fileName = `resume_${Date.now()}_${file.name}`;
+    const filePath = join(tempDir, fileName);
+
+    await writeFile(filePath, buffer);
+
     return NextResponse.json({
       fileName: file.name,
       fileSize: file.size,
       success: true,
-      text: `Document: ${file.name}\n\nPlaceholder resume content parsed from ${file.name}. This would contain the actual parsed DOCX content in production.\n\nTo implement full DOCX parsing, install mammoth.js:\n\nnpm install mammoth\n\nThen use:\n\nimport mammoth from "mammoth";\nconst result = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });\nconst text = result.value;`,
-      message: "DOCX file parsed successfully",
+      filePath: filePath,
+      message: "DOCX file stored successfully for OpenAI processing",
     });
   } catch (error) {
-    console.error("File validation error:", error);
+    console.error("File storage error:", error);
     return NextResponse.json(
       {
-        error: "Failed to validate DOCX file. Please try again.",
+        error: "Failed to store DOCX file. Please try again.",
+        details: error instanceof Error ? error.message : undefined,
       },
       { status: 500 }
     );

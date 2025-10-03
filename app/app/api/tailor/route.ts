@@ -10,15 +10,45 @@ export async function POST(request: Request) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { resume, jobDescription } = await request.json();
+    const { resumeFilePath, jobDescription } = await request.json();
+
+    // Validate inputs
+    if (!resumeFilePath) {
+      return Response.json(
+        { error: "Resume file path is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!jobDescription || !jobDescription.trim()) {
+      return Response.json(
+        { error: "Job description is required" },
+        { status: 400 }
+      );
+    }
+
+    // Check for required environment variables
+    if (!process.env.OPENAI_API_KEY) {
+      return Response.json(
+        {
+          error:
+            "OpenAI API key not configured. Please set OPENAI_API_KEY in environment variables.",
+        },
+        { status: 500 }
+      );
+    }
+
+    console.log("Starting resume tailoring...");
+    console.log("Resume file path:", resumeFilePath);
+    console.log("Job description length:", jobDescription.length);
 
     const resumeTailor = new ResumeTailor();
 
     const result = await resumeTailor.tailorResume({
-      resume,
+      resumeFilePath,
       jobDescription,
       userId: session.user?.email || "",
-      githubAccessToken: session.accessToken, // This is your GitHub token!
+      githubAccessToken: session.accessToken,
     });
 
     return Response.json(result);

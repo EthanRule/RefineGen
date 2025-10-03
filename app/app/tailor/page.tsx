@@ -8,25 +8,22 @@ import Header from "../components/Header";
 import Footer from "../components/footer/Footer";
 import LoadingCard from "../components/ui/LoadingCard";
 import ControlPanel from "./components/ControlPanel";
-import ResumeView from "./components/ResumeView";
-import ResultsDisplay from "./components/ResultsDisplay";
+import ImageView from "./components/ImageView";
 
-interface AnalysisResults {
-  gaps: any;
-  gapFillers: any[];
-  tailoredResume: string;
-  recommendations: string[];
+interface ImageGenerationResults {
+  imageUrl: string;
+  prompt: string;
+  timestamp: string;
 }
 
 export default function Tailor() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  // State for inputs
-  const [jobDescription, setJobDescription] = useState<string>("");
-  const [resumeFile, setResumeFile] = useState<File | null>(null);
-  const [resumeText, setResumeText] = useState<string>("");
-  const [results, setResults] = useState<AnalysisResults | null>(null);
+  // State for image generation
+  const [imagePrompt, setImagePrompt] = useState<string>("");
+  const [generatedImage, setGeneratedImage] =
+    useState<ImageGenerationResults | null>(null);
   const [error, setError] = useState<string>("");
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -34,29 +31,23 @@ export default function Tailor() {
     }
   }, [status, router]);
 
-  const handleStartAnalysis = async () => {
-    if (!jobDescription.trim()) {
-      setError("Please enter a job description");
-      return;
-    }
-
-    if (!resumeText || !resumeText.trim()) {
-      setError("Please upload a resume");
+  const handleGenerateImage = async () => {
+    if (!imagePrompt.trim()) {
+      setError("Please enter an image prompt");
       return;
     }
 
     setError("");
-    setResults(null);
+    setGeneratedImage(null);
 
     try {
-      const response = await fetch("/api/tailor", {
+      const response = await fetch("/api/generate-image", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          resume: resumeText,
-          jobDescription,
+          prompt: imagePrompt,
         }),
       });
 
@@ -65,20 +56,17 @@ export default function Tailor() {
       }
 
       const data = await response.json();
-      setResults(data);
+      setGeneratedImage(data);
     } catch (error) {
-      console.error("Analysis failed:", error);
-      setError(error instanceof Error ? error.message : "Analysis failed");
+      console.error("Image generation failed:", error);
+      setError(
+        error instanceof Error ? error.message : "Image generation failed"
+      );
     }
   };
 
-  const handleResumeChange = (file: File | null, text: string) => {
-    setResumeFile(file);
-    setResumeText(text);
-  };
-
-  const handleJobDescriptionChange = (value: string) => {
-    setJobDescription(value);
+  const handlePromptChange = (value: string) => {
+    setImagePrompt(value);
   };
 
   // Show loading state while checking authentication
@@ -141,14 +129,13 @@ export default function Tailor() {
             <div className="w-3/5 p-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
                 <ControlPanel
-                  onJobDescriptionChange={handleJobDescriptionChange}
-                  onResumeChange={handleResumeChange}
-                  onStart={handleStartAnalysis}
+                  onPromptChange={handlePromptChange}
+                  onStart={handleGenerateImage}
                 />
 
-                {/* Results Display */}
+                {/* Image Display */}
                 <div className="lg:col-span-2 flex flex-col min-h-0">
-                  <ResultsDisplay results={results} />
+                  <ImageView generatedImage={generatedImage} error={error} />
                 </div>
               </div>
             </div>

@@ -55,7 +55,7 @@ export default class DocxGenerator {
         });
 
         const completion = await this.openai.chat.completions.create({
-          model: "gpt-4o", // Use vision-capable model for DOCX
+          model: "gpt-5", // Use vision-capable model for DOCX
           messages: [
             {
               role: "user",

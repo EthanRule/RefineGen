@@ -1,9 +1,9 @@
-import GapAnalyzer, { GapAnalysis } from "./GapAnalyzer";
+import GapAnalyzer, { SkillGaps } from "./GapAnalyzer";
 import GapFillerSearch, { GapFiller } from "./GapFillerSearch";
 import DocxGenerator from "./DocxGenerator";
 
 interface TailorRequest {
-  resume: string;
+  resumeFilePath: string;
   jobDescription: string;
   userId: string;
   githubAccessToken?: string;
@@ -11,7 +11,7 @@ interface TailorRequest {
 
 interface TailorResponse {
   tailoredResume: string;
-  gaps: GapAnalysis;
+  gaps: SkillGaps;
   gapFillers: GapFiller[];
   recommendations: string[];
 }
@@ -29,34 +29,29 @@ export default class ResumeTailor {
 
   async tailorResume(data: TailorRequest): Promise<TailorResponse> {
     try {
-      // Step 1: Analyze gaps between resume and job description
-      const gaps = await this.gapAnalyzer.analyzeGaps(
-        data.resume,
+      // Step 1: Analyze gaps between DOCX resume and job description
+      const gaps = await this.gapAnalyzer.gapAnalysis(
+        data.resumeFilePath,
         data.jobDescription
-      );
-
-      // Step 2: Find GitHub projects to fill the gaps
-      const gapFillers = await this.gapFillerSearch.findGapFillers(
-        gaps,
-        data.userId,
-        data.githubAccessToken
       );
 
       console.log("gaps", gaps);
 
-      console.log("gapFillers", gapFillers);
+      // Step 2: Find GitHub projects to fill the gaps (commented for now)
+      const gapFillers: GapFiller[] = [];
 
-      // Step 3: Generate tailored resume content
-      const tailoredContent = `${data.resume}\n\n--- GPT TAILORING ANALYSIS ---\n${data.jobDescription}\n\nFor more detailed analysis with DOCX, please upload your DOCX file.`;
+      // Step 3: Generate tailored resume content (simplified for now)
+      const tailoredResume = `Tailored Resume for: ${
+        data.jobDescription
+      }\n\nGaps identified: ${gaps.missingSkills.join(", ")}`;
 
       return {
-        tailoredResume: tailoredContent,
+        tailoredResume,
         gaps,
         gapFillers,
         recommendations: [
-          `Identified ${gaps.missingSkills.length} missing skills`,
-          `Found ${gapFillers.length} relevant GitHub projects`,
-          `Priority level: ${gaps.priority}`,
+          `Found ${gaps.missingSkills.length} missing skills`,
+          "Resume successfully analyzed",
         ],
       };
     } catch (error) {
