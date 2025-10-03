@@ -1,4 +1,4 @@
-import ResumeTailor from "../lib/services/ResumeTailor";
+import ResumeTailor from "../lib/services/ImageGenerator";
 
 describe("ResumeTailor", () => {
   let resumeTailor: ResumeTailor;

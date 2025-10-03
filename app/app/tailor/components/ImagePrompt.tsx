@@ -51,7 +51,7 @@ export default function ImagePrompt({ onPromptChange }: ImagePromptProps) {
           padding: "var(--padding-y, 8px) var(--padding-x, 12px)",
           transition: "height 300ms ease-out",
         }}
-        className="w-full bg-zinc-700 text-white rounded-lg focus:outline-none resize-none placeholder-gray-400 overflow-hidden"
+        className="w-full bg-zinc-800 border-zinc-700 text-white rounded-lg focus:outline-none resize-none placeholder-gray-400 overflow-hidden"
         placeholder="Enter your image prompt here..."
         onChange={handleChange}
         rows={1}

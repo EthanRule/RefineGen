@@ -1,9 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import ImageGenerator from "../../../lib/services/ImageGenerator";
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,46 +7,54 @@ export async function POST(request: NextRequest) {
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json(
-        { error: "Prompt is required and must be a string" },
+        {
+          error: "Prompt is required and must be a string",
+          errorType: "invalid_prompt",
+          retryable: false,
+        },
         { status: 400 }
       );
     }
 
-    if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json(
-        { error: "OpenAI API key not configured" },
-        { status: 500 }
-      );
-    }
+    const imageGenerator = new ImageGenerator();
+    const result = await imageGenerator.generateImage({ prompt });
 
-    // Generate image using OpenAI DALL-E
-    const response = await openai.images.generate({
-      model: "dall-e-3",
-      prompt: prompt,
-      n: 1,
-      size: "1024x1024",
-      quality: "standard",
-    });
-
-    const imageUrl = response.data[0]?.url;
-
-    if (!imageUrl) {
-      return NextResponse.json(
-        { error: "Failed to generate image" },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({
-      imageUrl,
-      prompt,
-      timestamp: new Date().toISOString(),
-    });
+    return NextResponse.json(result);
   } catch (error) {
-    console.error("Image generation error:", error);
+    console.error("Image generation API error:", error);
+
+    // Check if it's our custom error with additional context
+    if (error instanceof Error && (error as any).errorType) {
+      const errorType = (error as any).errorType;
+      const retryable = (error as any).retryable;
+      const originalMessage = (error as any).originalMessage;
+
+      return NextResponse.json(
+        {
+          error: error.message,
+          errorType,
+          retryable,
+          originalMessage,
+        },
+        {
+          status:
+            errorType === "content_policy"
+              ? 400
+              : errorType === "rate_limit"
+              ? 429
+              : errorType === "quota_exceeded"
+              ? 402
+              : 500,
+        }
+      );
+    }
+
+    // Fallback for unexpected errors
     return NextResponse.json(
       {
         error: "Failed to generate image",
+        errorType: "unknown",
+        retryable: true,
         details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 }
