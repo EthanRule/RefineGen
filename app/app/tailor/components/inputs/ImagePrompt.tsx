@@ -8,10 +8,20 @@ interface ImagePromptProps {
 
 export default function ImagePrompt({ onPromptChange }: ImagePromptProps) {
   const [value, setValue] = useState('');
+  const [error, setError] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
+
+    // Client-side validation
+    if (newValue.length > 200) {
+      setError('Prompt must be 200 characters or less');
+      return;
+    } else {
+      setError('');
+    }
+
     setValue(newValue);
     onPromptChange?.(newValue);
 
@@ -48,11 +58,16 @@ export default function ImagePrompt({ onPromptChange }: ImagePromptProps) {
           padding: 'var(--padding-y, 8px) var(--padding-x, 12px)',
           transition: 'height 300ms ease-out',
         }}
-        className="w-full bg-zinc-800 border-zinc-700 text-white rounded-lg focus:outline-none resize-none placeholder-gray-400 overflow-hidden"
+        className={`w-full bg-zinc-800 border-zinc-700 text-white rounded-lg focus:outline-none resize-none placeholder-gray-400 overflow-hidden ${
+          error ? 'border-red-500 focus:border-red-400' : 'focus:border-zinc-500'
+        }`}
         placeholder="Describe your image here..."
         onChange={handleChange}
         rows={1}
+        maxLength={200}
       />
+      {error && <p className="text-red-400 text-sm mt-1">{error}</p>}
+      <p className="text-gray-400 text-xs mt-1">{value.length}/200 characters</p>
     </div>
   );
 }
