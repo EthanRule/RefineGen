@@ -4,19 +4,39 @@ interface RefineButtonProps {
   onRefine?: () => void;
   refineButtonState?: 'refine' | 'refining';
   disabled?: boolean;
+  refinementCount?: number;
 }
 
 export default function RefineButton({
   onRefine,
   refineButtonState = 'refine',
   disabled = false,
+  refinementCount = 0,
 }: RefineButtonProps) {
   const handleRefine = async () => {
-    if (refineButtonState === 'refining') return;
+    if (refineButtonState === 'refining' || refinementCount >= 10) return;
     await onRefine?.();
   };
 
+  const isAtLimit = refinementCount >= 10;
+  const isDisabled = disabled || isAtLimit;
+
   const getRefineButtonText = () => {
+    if (isAtLimit) {
+      return 'Refine';
+    }
+
+    if (refinementCount >= 7) {
+      switch (refineButtonState) {
+        case 'refine':
+          return `Refine (${refinementCount}/10)`;
+        case 'refining':
+          return 'Refining...';
+        default:
+          return `Refine (${refinementCount}/10)`;
+      }
+    }
+
     switch (refineButtonState) {
       case 'refine':
         return 'Refine';
@@ -30,8 +50,8 @@ export default function RefineButton({
   const getButtonClass = (isProcessing: boolean) => {
     const baseClass = 'px-4 py-2 rounded-lg font-semibold transition-colors text-white';
 
-    if (disabled || isProcessing) {
-      return `${baseClass} bg-purple-600 cursor-not-allowed`;
+    if (isDisabled || isProcessing) {
+      return `${baseClass} bg-gray-600 cursor-not-allowed`;
     }
 
     return `${baseClass} bg-purple-800 hover:bg-purple-900`;
@@ -42,7 +62,7 @@ export default function RefineButton({
   return (
     <button
       onClick={handleRefine}
-      disabled={disabled || refineButtonState === 'refining'}
+      disabled={isDisabled || refineButtonState === 'refining'}
       className={`flex-1 ${getButtonClass(showRefineSpinner)}`}
     >
       {showRefineSpinner ? (

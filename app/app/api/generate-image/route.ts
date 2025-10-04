@@ -36,10 +36,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { prompt } = requestBody;
+    const { prompt, originalPrompt } = requestBody;
+
+    // Use originalPrompt for validation if provided, otherwise use prompt
+    const promptToValidate = originalPrompt || prompt;
 
     // Validate prompt exists and is a string
-    if (!prompt || typeof prompt !== 'string') {
+    if (!promptToValidate || typeof promptToValidate !== 'string') {
       return NextResponse.json(
         {
           error: 'Prompt is required and must be a string',
@@ -50,8 +53,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate prompt length (max 200 characters)
-    if (prompt.length > 200) {
+    // Validate original prompt length (max 200 characters) - not the enhanced prompt
+    if (promptToValidate.length > 200) {
       return NextResponse.json(
         {
           error: 'Prompt must be 200 characters or less',
@@ -62,7 +65,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Sanitize the prompt
+    // Sanitize the enhanced prompt (the one actually used for generation)
     const sanitizedPrompt = sanitizePrompt(prompt);
 
     // Validate sanitized prompt is not empty
@@ -70,6 +73,33 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: 'Prompt contains only invalid characters',
+          errorType: 'invalid_prompt',
+          retryable: false,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check if prompt is just repeated characters (e.g., "aaaaaaa" or "ddddddd")
+    const uniqueChars = new Set(sanitizedPrompt.replace(/\s/g, '').toLowerCase());
+    if (uniqueChars.size <= 2 && sanitizedPrompt.length > 10) {
+      return NextResponse.json(
+        {
+          error: 'Please provide a more descriptive prompt',
+          errorType: 'invalid_prompt',
+          retryable: false,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check if prompt has at least some meaningful content (has vowels and consonants)
+    const hasVowels = /[aeiou]/i.test(sanitizedPrompt);
+    const hasConsonants = /[bcdfghjklmnpqrstvwxyz]/i.test(sanitizedPrompt);
+    if (!hasVowels || !hasConsonants) {
+      return NextResponse.json(
+        {
+          error: 'Please provide a more descriptive prompt with actual words',
           errorType: 'invalid_prompt',
           retryable: false,
         },

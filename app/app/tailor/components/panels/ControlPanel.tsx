@@ -18,6 +18,7 @@ interface ControlPanelProps {
   isLoadingAttributes?: boolean;
   refineButtonState?: 'refine' | 'refining';
   generateButtonState?: 'generate' | 'generating';
+  refinementCount?: number;
 }
 
 export default function ControlPanel({
@@ -30,6 +31,7 @@ export default function ControlPanel({
   isLoadingAttributes = false,
   refineButtonState = 'refine',
   generateButtonState = 'generate',
+  refinementCount = 0,
 }: ControlPanelProps) {
   return (
     <div className="lg:col-span-1 flex flex-col h-full max-h-[calc(100vh-20vh)]">
@@ -38,7 +40,7 @@ export default function ControlPanel({
         <div className="flex-shrink-0">
           <ImagePrompt onPromptChange={onPromptChange} />
         </div>
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 max-h-[50vh] overflow-y-auto">
           <DynamicSectionSelector
             sections={sections}
             selectedAttributes={selectedAttributes}
@@ -51,7 +53,11 @@ export default function ControlPanel({
       {/* Bottom Section: Buttons and Selected Attributes */}
       <div className="flex-shrink-0 pr-2 pt-8">
         <div className="flex gap-3">
-          <RefineButton onRefine={onRefine} refineButtonState={refineButtonState} />
+          <RefineButton
+            onRefine={onRefine}
+            refineButtonState={refineButtonState}
+            refinementCount={refinementCount}
+          />
           <GenerateButton onGenerate={onGenerate} generateButtonState={generateButtonState} />
         </div>
       </div>

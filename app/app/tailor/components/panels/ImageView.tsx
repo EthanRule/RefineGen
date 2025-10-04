@@ -23,15 +23,19 @@ export default function ImageView({
   onRetry,
 }: ImageViewProps) {
   return (
-    <div className="lg:col-span-2 flex flex-col">
-      <ImagePreview
-        imageUrl={generatedImage?.imageUrl}
-        error={error}
-        errorType={errorType}
-        isRetryable={isRetryable}
-        onRetry={onRetry}
-      />
-      <ActionButtons imageUrl={generatedImage?.imageUrl} prompt={generatedImage?.prompt} />
+    <div className="lg:col-span-2 flex flex-col h-full">
+      <div className="flex-1 min-h-0">
+        <ImagePreview
+          imageUrl={generatedImage?.imageUrl}
+          error={error}
+          errorType={errorType}
+          isRetryable={isRetryable}
+          onRetry={onRetry}
+        />
+      </div>
+      <div className="flex-shrink-0">
+        <ActionButtons imageUrl={generatedImage?.imageUrl} prompt={generatedImage?.prompt} />
+      </div>
     </div>
   );
 }

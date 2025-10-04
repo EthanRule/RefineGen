@@ -28,7 +28,10 @@ export default function DynamicSectionSelector({
           {PREDEFINED_SECTIONS.map((title, sectionIndex) => (
             <div
               key={sectionIndex}
-              className="bg-zinc-800 rounded-lg border border-zinc-700 flex flex-col flex-1 min-h-0"
+              className="bg-zinc-800 rounded-lg border border-zinc-700 flex flex-col flex-1 min-h-0 animate-pulse"
+              style={{
+                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              }}
             >
               <div className="px-4 py-3 flex-shrink-0">
                 <h4 className="text-xs font-semibold text-gray-300 uppercase tracking-wide">
@@ -36,23 +39,11 @@ export default function DynamicSectionSelector({
                 </h4>
               </div>
               <div className="p-4 flex-1 min-h-0 overflow-y-auto">
-                <div className="flex flex-wrap gap-2">
-                  {[...Array(10)].map((_, index) => (
-                    <div
-                      key={index}
-                      className="px-3 py-1 bg-gray-600 rounded-full animate-pulse"
-                    >
-                      <div className="w-12 h-3 bg-gray-500 rounded"></div>
-                    </div>
-                  ))}
-                </div>
+                {/* Empty content area */}
               </div>
             </div>
           ))}
         </div>
-        <p className="text-center text-gray-400 text-sm mt-3 flex-shrink-0">
-          Generating options...
-        </p>
       </div>
     );
   }
@@ -64,18 +55,11 @@ export default function DynamicSectionSelector({
           {PREDEFINED_SECTIONS.map((title, sectionIndex) => (
             <div
               key={sectionIndex}
-              className="bg-zinc-800 rounded-lg border border-zinc-700 flex flex-col flex-1 min-h-0"
+              className="bg-zinc-800 rounded-lg border border-zinc-700 flex items-center justify-center flex-1 min-h-0"
             >
-              <div className="px-4 py-3 flex-shrink-0">
-                <h4 className="text-xs font-semibold text-gray-300 uppercase tracking-wide">
-                  {/* Blank title */}
-                </h4>
-              </div>
-              <div className="p-4 flex-1 min-h-0 overflow-y-auto">
-                <p className="text-gray-500 text-sm text-center">
-                  Click "Refine" to generate options
-                </p>
-              </div>
+              <p className="text-gray-500 text-sm text-center m-0">
+                Click "Refine" to generate options
+              </p>
             </div>
           ))}
         </div>
@@ -98,7 +82,7 @@ export default function DynamicSectionSelector({
                   {section?.name}
                 </h4>
               </div>
-              <div className="p-4 flex-1 min-h-0 overflow-y-auto">
+              <div className="px-4 flex-1 min-h-0 overflow-y-auto">
                 {section && section.options ? (
                   <div className="flex flex-wrap gap-2">
                     {section.options.map(option => {
@@ -107,11 +91,12 @@ export default function DynamicSectionSelector({
                         <button
                           key={option}
                           onClick={() => onAttributeToggle(option)}
-                          className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 ${
+                          className={`px-3 py-1 rounded text-xs font-medium transition-all duration-200 max-w-32 truncate ${
                             isSelected
                               ? 'bg-purple-600 text-white shadow-lg transform scale-105'
                               : 'bg-gray-600 text-gray-300 hover:bg-gray-500 hover:text-white'
                           }`}
+                          title={option}
                         >
                           {option}
                         </button>

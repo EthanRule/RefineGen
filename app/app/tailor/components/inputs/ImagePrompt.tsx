@@ -48,6 +48,13 @@ export default function ImagePrompt({ onPromptChange }: ImagePromptProps) {
     }
   }, []);
 
+  const getCharacterCountColor = () => {
+    const remaining = 200 - value.length;
+    if (remaining <= 20) return 'text-red-400';
+    if (remaining <= 50) return 'text-yellow-400';
+    return 'text-gray-400';
+  };
+
   return (
     <div>
       <textarea
@@ -66,8 +73,12 @@ export default function ImagePrompt({ onPromptChange }: ImagePromptProps) {
         rows={1}
         maxLength={200}
       />
-      {error && <p className="text-red-400 text-sm mt-1">{error}</p>}
-      <p className="text-gray-400 text-xs mt-1">{value.length}/200 characters</p>
+      <div className="flex justify-between items-center mt-1">
+        <div className="flex-1">
+          {error && <p className="text-red-400 text-sm">{error}</p>}
+        </div>
+        <p className={`text-xs ${getCharacterCountColor()}`}>{200 - value.length} remaining</p>
+      </div>
     </div>
   );
 }

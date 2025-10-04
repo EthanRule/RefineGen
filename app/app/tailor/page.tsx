@@ -42,6 +42,7 @@ export default function Tailor() {
   const [generateButtonState, setGenerateButtonState] = useState<'generate' | 'generating'>(
     'generate'
   );
+  const [refinementCount, setRefinementCount] = useState<number>(0);
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth?callbackUrl=/tailor');
@@ -49,6 +50,13 @@ export default function Tailor() {
   }, [status, router]);
 
   const handleRefine = async () => {
+    // Check refinement limit
+    if (refinementCount >= 10) {
+      setError('Maximum 10 refinements allowed. Please generate an image to reset.');
+      setErrorType('invalid_prompt');
+      return;
+    }
+
     if (!imagePrompt.trim()) {
       setError('Please enter an image prompt');
       return;
@@ -61,6 +69,9 @@ export default function Tailor() {
 
     // Generate section options for the prompt
     await generateSectionOptions(imagePrompt.trim());
+
+    // Increment refinement count
+    setRefinementCount(prev => prev + 1);
   };
 
   const handleGenerateImage = async () => {
@@ -115,6 +126,7 @@ export default function Tailor() {
         },
         body: JSON.stringify({
           prompt: enhancedPrompt,
+          originalPrompt: imagePrompt.trim(),
         }),
       });
 
@@ -157,6 +169,7 @@ export default function Tailor() {
     setError('');
     setErrorType('');
     setIsRetryable(false);
+    setRefinementCount(0);
   };
 
   const generateSectionOptions = async (prompt: string) => {
@@ -179,7 +192,15 @@ export default function Tailor() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        // Try to get error details from response
+        try {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.error || `HTTP ${response.status}: ${response.statusText}`
+          );
+        } catch (parseError) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
       }
 
       const data = await response.json();
@@ -193,7 +214,16 @@ export default function Tailor() {
       });
     } catch (error) {
       console.error('Section options generation failed:', error);
-      // Don't show error to user for attribute generation failures
+
+      // Show user-friendly error message for prompt validation issues
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to generate options';
+
+      // Set error state to show to user
+      setError(errorMessage);
+      setErrorType('invalid_prompt');
+
+      // Clear sections on error
       setSections([]);
     } finally {
       setIsLoadingAttributes(false);
@@ -267,16 +297,15 @@ export default function Tailor() {
                   isLoadingAttributes={isLoadingAttributes}
                   refineButtonState={refineButtonState}
                   generateButtonState={generateButtonState}
+                  refinementCount={refinementCount}
                 />
-                <div className="lg:col-span-2 flex flex-col h-full">
-                  <ImageView
-                    generatedImage={generatedImage}
-                    error={error}
-                    errorType={errorType}
-                    isRetryable={isRetryable}
-                    onRetry={handleGenerateImage}
-                  />
-                </div>
+                <ImageView
+                  generatedImage={generatedImage}
+                  error={error}
+                  errorType={errorType}
+                  isRetryable={isRetryable}
+                  onRetry={handleGenerateImage}
+                />
               </div>
             </div>
           </div>

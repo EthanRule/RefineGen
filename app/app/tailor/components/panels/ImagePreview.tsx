@@ -65,6 +65,15 @@ export default function ImagePreview({
             d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"
           />
         );
+      case 'invalid_prompt':
+        return (
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+          />
+        );
       default:
         return (
           <path
@@ -87,6 +96,8 @@ export default function ImagePreview({
         return 'text-red-400';
       case 'network_error':
         return 'text-orange-400';
+      case 'invalid_prompt':
+        return 'text-yellow-400';
       default:
         return 'text-red-400';
     }
@@ -120,6 +131,8 @@ export default function ImagePreview({
                 ? 'Quota Exceeded'
                 : errorType === 'network_error'
                 ? 'Network Error'
+                : errorType === 'invalid_prompt'
+                ? 'Invalid Prompt'
                 : 'Error'}
             </p>
             <p className="text-sm text-gray-300 mb-4">{error}</p>

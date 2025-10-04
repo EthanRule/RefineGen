@@ -45,6 +45,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check if prompt is just repeated characters (e.g., "aaaaaaa" or "ddddddd")
+    const uniqueChars = new Set(sanitizedPrompt.replace(/\s/g, '').toLowerCase());
+    if (uniqueChars.size <= 2 && sanitizedPrompt.length > 10) {
+      return NextResponse.json(
+        { error: 'Please provide a more descriptive prompt' },
+        { status: 400 }
+      );
+    }
+
+    // Check if prompt has at least some meaningful content (has vowels and consonants)
+    const hasVowels = /[aeiou]/i.test(sanitizedPrompt);
+    const hasConsonants = /[bcdfghjklmnpqrstvwxyz]/i.test(sanitizedPrompt);
+    if (!hasVowels || !hasConsonants) {
+      return NextResponse.json(
+        { error: 'Please provide a more descriptive prompt with actual words' },
+        { status: 400 }
+      );
+    }
+
     if (!process.env.OPENAI_API_KEY) {
       return NextResponse.json({ error: 'OpenAI API key not configured' }, { status: 500 });
     }
@@ -75,9 +94,14 @@ export async function POST(request: NextRequest) {
 Rules:
 - Create 3 NEW section names that haven't been used yet (avoid repeating any sections the user has already seen)
 - Generate exactly 10 options for each section
-- Each option can be one or more words (no special characters, just letters and spaces)
+- Each option must be 1-3 words maximum (keep them short and concise)
+- No special characters, just letters and spaces
 - Make options specific and actionable for image generation
 - Consider the user's prompt and any previously selected attributes
+- IMPORTANT: Do NOT repeat any attributes that the user has already selected
+- IMPORTANT: Do NOT repeat any section names that the user has already seen
+- Make sure all options make sense for the image they want to create
+- Keep all options SHORT (1-3 words max) for better UI display
 - Return ONLY a JSON object with this exact structure:
 {
   "sections": [
@@ -96,8 +120,7 @@ Rules:
   ]
 }
 
-- IMPORTANT: Do NOT repeat any section names that the user has already seen
-- Make sure all options make sense for the image they want to create
+Examples of good SHORT options: "bright", "dark", "close-up", "wide shot", "soft", "sharp", "warm", "cool", "natural", "artificial", "minimalist", "detailed", "vibrant", "muted", "dramatic", "peaceful"
 
 Examples of good section names: "Lighting", "Perspective", "Texture", "Style", "Focus", "Depth", "Contrast", "Movement", "Scale", "Detail Level", "Atmosphere", "Composition", "Color Temperature", "Sharpness", "Background", "Foreground", "Angle", "Distance", "Weather", "Time of Day"`,
         },
@@ -122,7 +145,18 @@ Examples of good section names: "Lighting", "Perspective", "Texture", "Style", "
       sectionData = JSON.parse(responseText);
     } catch (parseError) {
       console.error('Failed to parse section JSON:', responseText);
-      throw new Error('Invalid section format');
+
+      // Try to extract JSON from markdown code blocks or other text
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          sectionData = JSON.parse(jsonMatch[0]);
+        } catch (e) {
+          throw new Error('Invalid section format - could not extract valid JSON');
+        }
+      } else {
+        throw new Error('Invalid section format - no JSON found in response');
+      }
     }
 
     console.log('Parsed section data:', JSON.stringify(sectionData, null, 2));
