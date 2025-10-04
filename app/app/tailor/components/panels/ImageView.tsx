@@ -1,5 +1,5 @@
-import ImagePreview from "./ImagePreview";
-import ActionButtons from "./ActionButtons";
+import ImagePreview from './ImagePreview';
+import { ActionButtons } from '../buttons';
 
 interface ImageViewProps {
   generatedImage?: {
@@ -31,10 +31,7 @@ export default function ImageView({
         isRetryable={isRetryable}
         onRetry={onRetry}
       />
-      <ActionButtons
-        imageUrl={generatedImage?.imageUrl}
-        prompt={generatedImage?.prompt}
-      />
+      <ActionButtons imageUrl={generatedImage?.imageUrl} prompt={generatedImage?.prompt} />
     </div>
   );
 }

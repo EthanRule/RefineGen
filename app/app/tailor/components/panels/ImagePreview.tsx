@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 'react';
 
 interface ImagePreviewProps {
   imageUrl?: string;
@@ -29,7 +29,7 @@ export default function ImagePreview({
   }, [imageUrl]);
   const getErrorIcon = () => {
     switch (errorType) {
-      case "content_policy":
+      case 'content_policy':
         return (
           <path
             strokeLinecap="round"
@@ -38,7 +38,7 @@ export default function ImagePreview({
             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
           />
         );
-      case "rate_limit":
+      case 'rate_limit':
         return (
           <path
             strokeLinecap="round"
@@ -47,7 +47,7 @@ export default function ImagePreview({
             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
           />
         );
-      case "quota_exceeded":
+      case 'quota_exceeded':
         return (
           <path
             strokeLinecap="round"
@@ -56,7 +56,7 @@ export default function ImagePreview({
             d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
           />
         );
-      case "network_error":
+      case 'network_error':
         return (
           <path
             strokeLinecap="round"
@@ -79,16 +79,16 @@ export default function ImagePreview({
 
   const getErrorColor = () => {
     switch (errorType) {
-      case "content_policy":
-        return "text-yellow-400";
-      case "rate_limit":
-        return "text-blue-400";
-      case "quota_exceeded":
-        return "text-red-400";
-      case "network_error":
-        return "text-orange-400";
+      case 'content_policy':
+        return 'text-yellow-400';
+      case 'rate_limit':
+        return 'text-blue-400';
+      case 'quota_exceeded':
+        return 'text-red-400';
+      case 'network_error':
+        return 'text-orange-400';
       default:
-        return "text-red-400";
+        return 'text-red-400';
     }
   };
 
@@ -96,8 +96,8 @@ export default function ImagePreview({
     <div
       className={`rounded-lg h-[40rem] min-h-[600px] max-h-[800px] w-full relative ${
         imageUrl
-          ? "bg-transparent border-none p-0"
-          : "bg-zinc-900 p-6 border-2 border-dashed border-zinc-700"
+          ? 'bg-transparent border-none p-0'
+          : 'bg-zinc-900 p-6 border-2 border-dashed border-zinc-700'
       }`}
     >
       <div className="h-full flex items-center justify-center">
@@ -112,15 +112,15 @@ export default function ImagePreview({
               {getErrorIcon()}
             </svg>
             <p className={`text-lg font-medium mb-2 ${getErrorColor()}`}>
-              {errorType === "content_policy"
-                ? "Content Policy Violation"
-                : errorType === "rate_limit"
-                ? "Rate Limit Exceeded"
-                : errorType === "quota_exceeded"
-                ? "Quota Exceeded"
-                : errorType === "network_error"
-                ? "Network Error"
-                : "Error"}
+              {errorType === 'content_policy'
+                ? 'Content Policy Violation'
+                : errorType === 'rate_limit'
+                ? 'Rate Limit Exceeded'
+                : errorType === 'quota_exceeded'
+                ? 'Quota Exceeded'
+                : errorType === 'network_error'
+                ? 'Network Error'
+                : 'Error'}
             </p>
             <p className="text-sm text-gray-300 mb-4">{error}</p>
             {isRetryable && onRetry && (
@@ -158,14 +158,14 @@ export default function ImagePreview({
               src={imageUrl}
               alt="Generated image"
               className={`w-full h-full object-cover rounded-lg transition-opacity duration-300 ${
-                imageLoaded ? "opacity-100" : "opacity-0"
+                imageLoaded ? 'opacity-100' : 'opacity-0'
               }`}
               loading="eager"
               decoding="sync"
               style={{
-                imageRendering: "auto",
-                backfaceVisibility: "hidden",
-                transform: "translateZ(0)",
+                imageRendering: 'auto',
+                backfaceVisibility: 'hidden',
+                transform: 'translateZ(0)',
               }}
               onLoad={() => setImageLoaded(true)}
               onError={() => setImageError(true)}
