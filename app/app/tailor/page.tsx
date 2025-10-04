@@ -260,15 +260,16 @@ export default function Tailor() {
   // Show loading state while checking authentication
   if (status === 'loading') {
     return (
-      <div className="min-h-screen bg-zinc-700">
-        <Header props={{ status, session }} />
-        <main className="flex items-center justify-center min-h-[60vh]">
-          <div className="text-center">
-            <LoadingCard />
-            <p className="text-white mt-4">Checking authentication...</p>
+      <div className="min-h-screen bg-black flex flex-col">
+        <main className="flex-1 flex justify-center mx-2 my-2">
+          <div className="bg-stone-950 rounded-lg shadow-lg border border-stone-700 w-full flex flex-col min-h-[calc(100vh-1rem)]">
+            <div className="flex flex-1 justify-center items-center">
+              <div className="relative w-12 h-12">
+                <div className="absolute inset-0 w-12 h-12 border border-white rounded-full animate-expand-1"></div>
+              </div>
+            </div>
           </div>
         </main>
-        <Footer props={{ status, session }} />
       </div>
     );
   }

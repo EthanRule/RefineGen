@@ -1,9 +1,30 @@
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+
 interface ActionButtonsProps {
   imageUrl?: string;
   prompt?: string;
+  customFilename?: string;
 }
 
-export default function ActionButtons({ imageUrl, prompt }: ActionButtonsProps) {
+export default function ActionButtons({
+  imageUrl,
+  prompt,
+  customFilename,
+}: ActionButtonsProps) {
+  const [filename, setFilename] = useState<string>('');
+  const filenameRef = useRef<HTMLInputElement>(null);
+
+  // Set default filename when imageUrl changes
+  useEffect(() => {
+    if (imageUrl && !filename) {
+      // Use custom filename if available, otherwise use simple "image.png"
+      const defaultName = customFilename || 'image.png';
+      setFilename(defaultName);
+    }
+  }, [imageUrl, prompt, filename, customFilename]);
+
   const handleDownload = async () => {
     if (!imageUrl) return;
 
@@ -62,21 +83,22 @@ export default function ActionButtons({ imageUrl, prompt }: ActionButtonsProps) 
   };
 
   const downloadBlob = async (blob: Blob) => {
-    // Create a more descriptive filename based on the prompt
-    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-    const promptSlug = prompt
-      ? prompt
-          .slice(0, 30)
-          .replace(/[^a-zA-Z0-9\s]/g, '')
-          .replace(/\s+/g, '-')
-      : 'generated-image';
-    const filename = `${promptSlug}-${timestamp}.png`;
+    // Use the user's filename input
+    const userFilename = filename.trim() || 'image.png';
+
+    // Ensure filename has proper extension
+    const finalFilename =
+      userFilename.endsWith('.png') ||
+      userFilename.endsWith('.jpg') ||
+      userFilename.endsWith('.jpeg')
+        ? userFilename
+        : `${userFilename}.png`;
 
     // Create download link
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = filename;
+    a.download = finalFilename;
     a.style.display = 'none';
 
     // Trigger download
@@ -89,17 +111,22 @@ export default function ActionButtons({ imageUrl, prompt }: ActionButtonsProps) 
       window.URL.revokeObjectURL(url);
     }, 100);
 
-    console.log(`Downloaded: ${filename}`);
+    console.log(`Downloaded: ${finalFilename}`);
+  };
+
+  const handleFilenameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilename(e.target.value);
   };
 
   return (
     <div className="mt-4 flex flex-row gap-2 sm:gap-3 w-full">
       <input
+        ref={filenameRef}
         type="text"
-        className="flex-1 px-2 sm:px-3 py-2 border border-gray-500 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-gray-400 focus:border-transparent placeholder-gray-400 text-xs sm:text-sm min-w-0"
+        value={filename}
+        onChange={handleFilenameChange}
+        className="flex-1 px-2 sm:px-3 py-2 border border-gray-500 bg-gray-700 text-white rounded-lg focus:border-transparent placeholder-gray-400 text-xs sm:text-sm min-w-0"
         placeholder="image.png"
-        defaultValue={prompt ? `generated-image-${Date.now()}.png` : 'image.png'}
-        disabled
       />
       <button
         onClick={handleDownload}

@@ -20,11 +20,39 @@
 }
 
 body {
-  background: var(--background);
+  background: #000000; /* Force black background immediately */
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
 
 html {
   scroll-behavior: smooth;
+  background: #000000; /* Prevent flash of white background */
+}
+
+body {
+  background: #000000; /* Force black background immediately */
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Custom expanding circle animation */
+@keyframes expand-pulse {
+  0% {
+    transform: scale(3);
+    opacity: 1;
+    border-width: 2px;
+  }
+  20% {
+    opacity: 0;
+  }
+  100% {
+    transform: scale(9);
+    opacity: 0;
+    border-width: 0px;
+  }
+}
+
+.animate-expand-1 {
+  animation: expand-pulse 2s ease-out infinite;
 }
