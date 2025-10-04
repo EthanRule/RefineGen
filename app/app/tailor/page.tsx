@@ -10,6 +10,7 @@ import LoadingCard from '../components/ui/LoadingCard';
 import ControlPanel from './components/panels/ControlPanel';
 import ImageView from './components/panels/ImageView';
 import TailorHeader from './components/panels/TailorHeader';
+import ImageGallery from './components/panels/ImageGallery';
 
 interface ImageGenerationResults {
   imageUrl: string;
@@ -43,6 +44,8 @@ export default function Tailor() {
     'generate'
   );
   const [refinementCount, setRefinementCount] = useState<number>(0);
+  const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth?callbackUrl=/tailor');
@@ -257,6 +260,10 @@ export default function Tailor() {
     });
   };
 
+  const handleToggleGallery = () => {
+    setIsGalleryOpen(prev => !prev);
+  };
+
   // Show loading state while checking authentication
   if (status === 'loading') {
     return (
@@ -282,9 +289,13 @@ export default function Tailor() {
   // Show the tailor page for authenticated users
   return (
     <div className="min-h-screen bg-black flex flex-col overflow-y-auto lg:overflow-hidden lg:h-screen">
-      <main className="flex-1 flex justify-center mx-2 my-2">
-        <div className="bg-stone-950 rounded-lg shadow-lg border border-stone-700 w-full flex flex-col min-h-[calc(100vh-1rem)] lg:max-h-[calc(100vh-1rem)]">
-          <TailorHeader />
+      <main className="flex-1 flex mx-2 my-2">
+        <div
+          className={`bg-stone-950 rounded-lg shadow-lg border border-stone-700 flex flex-col min-h-[calc(100vh-1rem)] lg:max-h-[calc(100vh-1rem)] transition-all duration-300 ease-in-out ${
+            isGalleryOpen ? 'w-4/5 mr-2' : 'w-full'
+          }`}
+        >
+          <TailorHeader onToggleGallery={handleToggleGallery} isGalleryOpen={isGalleryOpen} />
           <div className="flex flex-1 justify-center min-h-0 py-[5vh] lg:py-[10vh]">
             <div className="w-full lg:w-3/5 h-full px-4 lg:px-0">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full items-stretch h-full max-h-full">
@@ -311,6 +322,11 @@ export default function Tailor() {
             </div>
           </div>
         </div>
+
+        {/* Image Gallery Panel */}
+        {isGalleryOpen && (
+          <ImageGallery isOpen={isGalleryOpen} onClose={() => setIsGalleryOpen(false)} />
+        )}
       </main>
     </div>
   );

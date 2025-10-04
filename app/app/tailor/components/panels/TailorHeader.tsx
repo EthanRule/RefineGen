@@ -3,10 +3,11 @@
 import { useRouter } from 'next/navigation';
 
 interface TailorHeaderProps {
-  // Add any props you might need in the future
+  onToggleGallery?: () => void;
+  isGalleryOpen?: boolean;
 }
 
-export default function TailorHeader({}: TailorHeaderProps) {
+export default function TailorHeader({ onToggleGallery, isGalleryOpen }: TailorHeaderProps) {
   const router = useRouter();
 
   return (
@@ -26,8 +27,27 @@ export default function TailorHeader({}: TailorHeaderProps) {
         </svg>
       </button>
 
-      {/* Placeholder for future header icons */}
-      <div className="flex items-center space-x-4">{/* Future icons can go here */}</div>
+      {/* Gallery Toggle Button */}
+      <div className="flex items-center space-x-4">
+        <button
+          onClick={onToggleGallery}
+          className={`p-2 rounded-lg transition-colors ${
+            isGalleryOpen
+              ? 'bg-purple-600 text-white'
+              : 'text-gray-400 hover:text-white hover:bg-zinc-800'
+          }`}
+          title={isGalleryOpen ? 'Close Gallery' : 'Open Gallery'}
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+            />
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }
