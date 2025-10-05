@@ -1,5 +1,7 @@
-import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authConfig } from '@/lib/auth';
+import OpenAI from 'openai';
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -7,28 +9,31 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await getServerSession(authConfig);
+    if (!session) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
     const { prompt } = await request.json();
 
-    if (!prompt || typeof prompt !== "string") {
+    if (!prompt || typeof prompt !== 'string') {
       return NextResponse.json(
-        { error: "Prompt is required and must be a string" },
+        { error: 'Prompt is required and must be a string' },
         { status: 400 }
       );
     }
 
     if (!process.env.OPENAI_API_KEY) {
-      return NextResponse.json(
-        { error: "OpenAI API key not configured" },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'OpenAI API key not configured' }, { status: 500 });
     }
 
     // Generate attribute suggestions using GPT
     const response = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: 'gpt-4',
       messages: [
         {
-          role: "system",
+          role: 'system',
           content: `You are an expert image generation assistant. Given a user's prompt, suggest 5 single-word attributes that would help refine and improve the image generation. 
 
 Rules:
@@ -44,7 +49,7 @@ Prompt: "mountain landscape" → "dramatic, serene, misty, golden, panoramic"
 Prompt: "cyberpunk city" → "neon, futuristic, dark, vibrant, urban"`,
         },
         {
-          role: "user",
+          role: 'user',
           content: `Generate 5 single-word attributes for this image prompt: "${prompt}"`,
         },
       ],
@@ -55,18 +60,18 @@ Prompt: "cyberpunk city" → "neon, futuristic, dark, vibrant, urban"`,
     const attributesText = response.choices[0]?.message?.content?.trim();
 
     if (!attributesText) {
-      throw new Error("No attributes generated");
+      throw new Error('No attributes generated');
     }
 
     // Parse the attributes (split by comma and clean up)
     const attributes = attributesText
-      .split(",")
-      .map((attr) => attr.trim().toLowerCase())
-      .filter((attr) => attr.length > 0 && /^[a-zA-Z]+$/.test(attr))
+      .split(',')
+      .map(attr => attr.trim().toLowerCase())
+      .filter(attr => attr.length > 0 && /^[a-zA-Z]+$/.test(attr))
       .slice(0, 5); // Ensure we only get 5 attributes
 
     if (attributes.length === 0) {
-      throw new Error("No valid attributes generated");
+      throw new Error('No valid attributes generated');
     }
 
     return NextResponse.json({
@@ -74,11 +79,11 @@ Prompt: "cyberpunk city" → "neon, futuristic, dark, vibrant, urban"`,
       prompt,
     });
   } catch (error) {
-    console.error("Attribute generation error:", error);
+    console.error('Attribute generation error:', error);
     return NextResponse.json(
       {
-        error: "Failed to generate attributes",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to generate attributes',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );

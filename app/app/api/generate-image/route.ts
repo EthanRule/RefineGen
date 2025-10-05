@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authConfig } from '@/lib/auth';
 import ImageGenerator from '../../../lib/services/ImageGenerator';
+import { imageGenerationRateLimit, addRateLimitHeaders } from '../../../lib/rateLimit';
+import { apiLogger, extractUserInfo, generateRequestId } from '../../../lib/logger';
 
 /**
  * Sanitizes a prompt by removing or escaping potentially problematic characters
@@ -20,7 +24,36 @@ function sanitizePrompt(prompt: string): string {
 }
 
 export async function POST(request: NextRequest) {
+  const requestId = generateRequestId();
+
   try {
+    // Check authentication
+    const session = await getServerSession(authConfig);
+    if (!session) {
+      apiLogger.warn('Unauthorized image generation attempt', { requestId });
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    const userInfo = extractUserInfo(session);
+    apiLogger.info('Image generation request started', {
+      requestId,
+      userId: userInfo.userId,
+      userEmail: userInfo.userEmail,
+    });
+
+    // Apply rate limiting
+    const ip =
+      request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const rateLimitResponse = imageGenerationRateLimit(request);
+    if (rateLimitResponse) {
+      apiLogger.warn('Rate limit exceeded for image generation', {
+        requestId,
+        userId: userInfo.userId,
+        ip,
+      });
+      return rateLimitResponse;
+    }
+
     // Parse request body with error handling
     let requestBody;
     try {
@@ -113,9 +146,21 @@ export async function POST(request: NextRequest) {
       model: 'dall-e-3',
     });
 
-    return NextResponse.json(result);
+    const response = NextResponse.json(result);
+    apiLogger.info('Image generation completed successfully', {
+      requestId,
+      userId: userInfo.userId,
+      promptLength: sanitizedPrompt.length,
+    });
+    return addRateLimitHeaders(response, ip, { windowMs: 60 * 1000, maxRequests: 5 });
   } catch (error) {
-    console.error('Image generation API error:', error);
+    // Get session again for error logging (in case it wasn't available earlier)
+    const session = await getServerSession(authConfig);
+    const userInfo = extractUserInfo(session);
+    apiLogger.error('Image generation API error', error as Error, {
+      requestId,
+      userId: userInfo.userId,
+    });
 
     // Check if it's our custom error with additional context
     if (error instanceof Error && (error as any).errorType) {

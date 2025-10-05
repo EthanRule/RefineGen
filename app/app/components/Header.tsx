@@ -40,6 +40,11 @@ export default function Header({ props }: { props: { status: string; session: an
                         className="w-8 h-8 rounded-full border-2 border-gray-300"
                       />
                     )}
+                    {!session.user?.image && (
+                      <div className="w-8 h-8 rounded-full border-2 border-gray-300 bg-gray-600 flex items-center justify-center text-xs text-white">
+                        {session.user?.name?.charAt(0) || '?'}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   !isAuthPage && (

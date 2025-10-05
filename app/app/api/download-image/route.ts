@@ -1,29 +1,74 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authConfig } from '@/lib/auth';
+import { downloadRateLimit, addRateLimitHeaders } from '../../../lib/rateLimit';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await getServerSession(authConfig);
+    if (!session) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    }
+
+    // Apply rate limiting
+    const ip =
+      request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
+    const rateLimitResponse = downloadRateLimit(request);
+    if (rateLimitResponse) {
+      return rateLimitResponse;
+    }
+
     const { imageUrl } = await request.json();
 
-    if (!imageUrl || typeof imageUrl !== "string") {
-      return NextResponse.json(
-        { error: "Image URL is required" },
-        { status: 400 }
-      );
+    if (!imageUrl || typeof imageUrl !== 'string') {
+      return NextResponse.json({ error: 'Image URL is required' }, { status: 400 });
     }
 
-    // Validate that it's a valid image URL
-    if (!imageUrl.startsWith("https://")) {
-      return NextResponse.json({ error: "Invalid image URL" }, { status: 400 });
+    // Enhanced URL validation to prevent SSRF attacks
+    let parsedUrl;
+    try {
+      parsedUrl = new URL(imageUrl);
+    } catch {
+      return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 });
     }
 
-    // Fetch the image from the external URL
+    // Only allow HTTPS URLs
+    if (parsedUrl.protocol !== 'https:') {
+      return NextResponse.json({ error: 'Only HTTPS URLs are allowed' }, { status: 400 });
+    }
+
+    // Block private/internal IP addresses and localhost
+    const hostname = parsedUrl.hostname;
+    const privateIPRegex =
+      /^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|127\.|169\.254\.|::1|localhost)/;
+    if (privateIPRegex.test(hostname)) {
+      return NextResponse.json({ error: 'Private URLs are not allowed' }, { status: 400 });
+    }
+
+    // Block file:// and other dangerous protocols
+    if (
+      parsedUrl.protocol === 'file:' ||
+      parsedUrl.protocol === 'ftp:' ||
+      parsedUrl.protocol === 'data:'
+    ) {
+      return NextResponse.json({ error: 'Unsupported URL protocol' }, { status: 400 });
+    }
+
+    // Fetch the image from the external URL with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
     const response = await fetch(imageUrl, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; ImageDownloader/1.0)",
-        Accept: "image/*",
+        'User-Agent': 'Mozilla/5.0 (compatible; ImageDownloader/1.0)',
+        Accept: 'image/*',
       },
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       return NextResponse.json(
@@ -32,25 +77,54 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate content type
+    const contentType = response.headers.get('content-type') || '';
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.some(type => contentType.startsWith(type))) {
+      return NextResponse.json(
+        { error: 'Invalid content type. Only image files are allowed.' },
+        { status: 400 }
+      );
+    }
+
+    // Check content length before downloading
+    const contentLength = response.headers.get('content-length');
+    const maxSize = 10 * 1024 * 1024; // 10MB limit
+    if (contentLength && parseInt(contentLength) > maxSize) {
+      return NextResponse.json(
+        { error: 'File too large. Maximum size is 10MB.' },
+        { status: 400 }
+      );
+    }
+
     // Get the image data
     const imageBuffer = await response.arrayBuffer();
-    const contentType = response.headers.get("content-type") || "image/png";
+
+    // Double-check size after download
+    if (imageBuffer.byteLength > maxSize) {
+      return NextResponse.json(
+        { error: 'File too large. Maximum size is 10MB.' },
+        { status: 400 }
+      );
+    }
 
     // Return the image as a blob
-    return new NextResponse(imageBuffer, {
+    const response = new NextResponse(imageBuffer, {
       status: 200,
       headers: {
-        "Content-Type": contentType,
-        "Content-Disposition": "attachment",
-        "Cache-Control": "no-cache",
+        'Content-Type': contentType,
+        'Content-Disposition': 'attachment',
+        'Cache-Control': 'no-cache',
       },
     });
+
+    return addRateLimitHeaders(response, ip, { windowMs: 60 * 1000, maxRequests: 10 });
   } catch (error) {
-    console.error("Download proxy error:", error);
+    console.error('Download proxy error:', error);
     return NextResponse.json(
       {
-        error: "Failed to download image",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: 'Failed to download image',
+        details: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
     );
