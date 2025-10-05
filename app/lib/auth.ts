@@ -1,6 +1,7 @@
-import { NextAuthOptions, getServerSession } from "next-auth";
-import GithubProvider from "next-auth/providers/github";
-import { redirect } from "next/navigation";
+import { NextAuthOptions, getServerSession } from 'next-auth';
+import GithubProvider from 'next-auth/providers/github';
+import GoogleProvider from 'next-auth/providers/google';
+import { redirect } from 'next/navigation';
 
 export const authConfig: NextAuthOptions = {
   providers: [
@@ -9,9 +10,13 @@ export const authConfig: NextAuthOptions = {
       clientSecret: process.env.GITHUB_SECRET as string,
       authorization: {
         params: {
-          scope: "read:user user:email public_repo", // Changed to public_repo for read-only access
+          scope: 'read:user user:email',
         },
       },
+    }),
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     }),
   ],
   callbacks: {
@@ -30,5 +35,5 @@ export const authConfig: NextAuthOptions = {
 
 export async function LoginIsRequiredServer() {
   const session = await getServerSession(authConfig);
-  if (!session) return redirect("/");
+  if (!session) return redirect('/');
 }
