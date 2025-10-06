@@ -146,6 +146,32 @@ export default function TailorClient() {
 
       setGeneratedImage(data);
       setGenerateButtonState('generate'); // Reset to generate for next image
+
+      // Save image to S3 and database
+      try {
+        const saveResponse = await fetch('/api/save-image', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            imageUrl: data.imageUrl,
+            prompt: imagePrompt.trim(),
+            attributes: selectedAttributes,
+            filename: `generated_${Date.now()}.png`,
+          }),
+        });
+
+        if (saveResponse.ok) {
+          const saveData = await saveResponse.json();
+          console.log('✅ Image saved successfully:', saveData);
+        } else {
+          console.error('❌ Failed to save image:', await saveResponse.text());
+        }
+      } catch (saveError) {
+        console.error('❌ Error saving image:', saveError);
+        // Don't show error to user - image still generated successfully
+      }
     } catch (error) {
       console.error('Image generation failed:', error);
       setError(error instanceof Error ? error.message : 'Image generation failed');
