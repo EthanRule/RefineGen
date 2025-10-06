@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from 'next/link';
 
 export default function HeaderLogo() {
   return (
@@ -6,7 +6,9 @@ export default function HeaderLogo() {
       <div className="flex-shrink-0">
         <Link href="/" className="hover:opacity-80 transition-opacity">
           <h1 className="text-2xl font-bold text-white">
-            <span className="text-gray-300">Tailor</span>Apply
+            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+              genRudar
+            </span>
           </h1>
         </Link>
       </div>

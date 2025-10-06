@@ -20,6 +20,19 @@ interface ImageGenerationResults {
   size: string;
 }
 
+interface SavedImage {
+  id: string;
+  s3Key: string;
+  s3Bucket: string;
+  publicUrl: string;
+  prompt: string;
+  attributes: string[];
+  filename: string;
+  fileSize: number;
+  contentType: string;
+  createdAt: string;
+}
+
 export default function TailorClient() {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -30,6 +43,10 @@ export default function TailorClient() {
   const [error, setError] = useState<string>('');
   const [errorType, setErrorType] = useState<string>('');
   const [isRetryable, setIsRetryable] = useState<boolean>(false);
+
+  // State for saved images gallery
+  const [savedImages, setSavedImages] = useState<SavedImage[]>([]);
+  const [isLoadingImages, setIsLoadingImages] = useState<boolean>(false);
 
   // State for dynamic section workflow
   const [sections, setSections] = useState<Array<{ name: string; options: string[] }>>([]);
@@ -45,6 +62,33 @@ export default function TailorClient() {
   );
   const [refinementCount, setRefinementCount] = useState<number>(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
+
+  // Function to fetch user's saved images
+  const fetchImages = async () => {
+    setIsLoadingImages(true);
+    try {
+      const response = await fetch('/api/get-images');
+      if (response.ok) {
+        const data = await response.json();
+        console.log('🔍 DEBUG - Fetch images response:', JSON.stringify(data, null, 2));
+        setSavedImages(data.images || []);
+        console.log('✅ Images fetched successfully:', data.count);
+      } else {
+        console.error('❌ Failed to fetch images:', await response.text());
+      }
+    } catch (error) {
+      console.error('❌ Error fetching images:', error);
+    } finally {
+      setIsLoadingImages(false);
+    }
+  };
+
+  // Fetch images when gallery opens
+  useEffect(() => {
+    if (isGalleryOpen) {
+      fetchImages();
+    }
+  }, [isGalleryOpen]);
 
   const handleRefine = async () => {
     // Check refinement limit
@@ -165,6 +209,11 @@ export default function TailorClient() {
         if (saveResponse.ok) {
           const saveData = await saveResponse.json();
           console.log('✅ Image saved successfully:', saveData);
+
+          // Refresh gallery if it's open
+          if (isGalleryOpen) {
+            fetchImages();
+          }
         } else {
           console.error('❌ Failed to save image:', await saveResponse.text());
         }
@@ -340,7 +389,13 @@ export default function TailorClient() {
 
         {/* Image Gallery Panel */}
         {isGalleryOpen && (
-          <ImageGallery isOpen={isGalleryOpen} onClose={() => setIsGalleryOpen(false)} />
+          <ImageGallery
+            isOpen={isGalleryOpen}
+            onClose={() => setIsGalleryOpen(false)}
+            images={savedImages}
+            isLoading={isLoadingImages}
+            onRefresh={fetchImages}
+          />
         )}
       </main>
     </div>

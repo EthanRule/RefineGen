@@ -26,16 +26,16 @@ export default function Home() {
           <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
             <div className="max-w-4xl mx-auto">
               <h1 className="text-5xl lg:text-7xl font-bold text-white mb-6 leading-tight">
-                AI-Powered
+                Welcome to
                 <span className="block bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                  Image Generation
+                  genRudar
                 </span>
               </h1>
 
               {/* Subheading */}
               <p className="text-xl lg:text-2xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
-                Create stunning images with AI. Describe your vision, refine with precision,
-                and generate beautiful artwork in seconds.
+                Your AI-powered creative platform. Generate stunning images, refine with
+                precision, and bring your vision to life in seconds.
               </p>
 
               {/* CTA Button */}

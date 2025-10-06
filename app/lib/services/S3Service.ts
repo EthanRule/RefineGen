@@ -51,6 +51,16 @@ export class S3Service {
 
     await this.s3Client.send(command);
 
-    return `https://${this.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    // Generate presigned URL for private access
+    const getCommand = new GetObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+    });
+
+    const presignedUrl = await getSignedUrl(this.s3Client, getCommand, {
+      expiresIn: 3600 * 24 * 7, // 7 days
+    });
+
+    return presignedUrl;
   }
 }

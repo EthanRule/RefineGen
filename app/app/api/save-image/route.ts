@@ -78,6 +78,9 @@ export async function POST(request: NextRequest) {
       fileSize: imageBuffer.length,
     });
 
+    // Debug: Log the saved image record
+    console.log('🔍 DEBUG - Saved image record:', JSON.stringify(imageRecord, null, 2));
+
     return NextResponse.json({
       success: true,
       imageId: imageRecord.id,

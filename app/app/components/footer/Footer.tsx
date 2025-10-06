@@ -15,11 +15,13 @@ export default function Footer({ props }: { props: { status: string; session: an
               {/* Brand */}
               <div className="col-span-1 md:col-span-2">
                 <h3 className="text-2xl font-bold mb-4">
-                  <span className="text-gray-400">Tailor</span>Apply
+                  <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    genRudar
+                  </span>
                 </h3>
                 <p className="text-gray-400 mb-4 max-w-md">
-                  AI-powered image generation platform. Describe your vision, refine with
-                  precision, and create stunning artwork in seconds.
+                  Your AI-powered creative platform. Generate stunning images, refine with
+                  precision, and bring your vision to life in seconds.
                 </p>
                 <div className="flex space-x-4">
                   <a
@@ -107,9 +109,7 @@ export default function Footer({ props }: { props: { status: string; session: an
             </div>
 
             <div className="border-t border-gray-800 mt-8 pt-8 flex justify-between items-center">
-              <p className="text-gray-400">
-                © {currentYear} TailorApply. All rights reserved.
-              </p>
+              <p className="text-gray-400">© {currentYear} Genrudar. All rights reserved.</p>
               {session && (
                 <button
                   onClick={() => signOut()}
