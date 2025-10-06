@@ -1,7 +1,6 @@
 import { getServerSession } from 'next-auth';
 import { authConfig } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-// @ts-expect-error: TailorClient module might not have type declarations
 import TailorClient from './TailorClient';
 
 export default async function Tailor() {
