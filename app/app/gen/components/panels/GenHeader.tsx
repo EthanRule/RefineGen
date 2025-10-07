@@ -6,9 +6,14 @@ import { useState, useEffect } from 'react';
 interface GenHeaderProps {
   onToggleGallery?: () => void;
   isGalleryOpen?: boolean;
+  tokenCount?: number;
 }
 
-export default function GenHeader({ onToggleGallery, isGalleryOpen }: GenHeaderProps) {
+export default function GenHeader({
+  onToggleGallery,
+  isGalleryOpen,
+  tokenCount = 0,
+}: GenHeaderProps) {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
 
@@ -50,14 +55,31 @@ export default function GenHeader({ onToggleGallery, isGalleryOpen }: GenHeaderP
         </svg>
       </button>
 
-      {/* Gallery Toggle Button */}
+      {/* Right Side: Token Count, Gem Icon, and Gallery Button */}
       <div className="flex items-center space-x-4">
+        {/* Token Count and Gem Icon */}
+        <div className="flex items-center space-x-2 cursor-pointer group hover:bg-zinc-800 rounded-lg p-1 px-2 active:bg-zinc-700">
+          <span className="text-white font-semibold text-lg group-hover:text-green-200 transition-colors">
+            {tokenCount}
+          </span>
+          <div className="relative">
+            <svg
+              className="w-6 h-6 text-green-400 group-hover:rotate-180 transition-transform duration-300"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              style={{ transform: 'scaleY(-1)' }}
+            >
+              <path d="M12 2L6 8L12 14L18 8L12 2ZM6 8L12 14L6 20L6 8ZM18 8L12 14L18 20L18 8Z" />
+            </svg>
+            <div className="absolute inset-0 bg-gradient-to-br from-green-300 to-green-600 rounded-full opacity-20"></div>
+          </div>
+        </div>
         <button
           onClick={handleGalleryToggle}
           className={`p-2 rounded-lg transition-colors ${
             isGalleryOpen && !isMobile
               ? 'bg-cyan-600 text-white'
-              : 'text-white-400 hover:text-white hover:bg-zinc-800'
+              : 'text-white-400 hover:text-white hover:bg-zinc-800 active:bg-zinc-700'
           }`}
           title={isMobile ? 'Open Gallery' : isGalleryOpen ? 'Close Gallery' : 'Open Gallery'}
         >

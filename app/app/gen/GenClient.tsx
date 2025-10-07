@@ -62,6 +62,7 @@ export default function GenClient() {
   );
   const [refinementCount, setRefinementCount] = useState<number>(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
+  const [tokenCount, setTokenCount] = useState<number>(100); // Default token count
 
   // Function to fetch user's saved images
   const fetchImages = async () => {
@@ -359,7 +360,11 @@ export default function GenClient() {
             isGalleryOpen ? 'w-4/5 mr-2' : 'w-full'
           }`}
         >
-          <GenHeader onToggleGallery={handleToggleGallery} isGalleryOpen={isGalleryOpen} />
+          <GenHeader
+            onToggleGallery={handleToggleGallery}
+            isGalleryOpen={isGalleryOpen}
+            tokenCount={tokenCount}
+          />
           <div className="flex flex-1 justify-center min-h-0 py-[5vh] lg:py-[10vh]">
             <div className="w-full lg:w-3/5 h-full px-4 lg:px-0">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full items-stretch h-full max-h-full">
