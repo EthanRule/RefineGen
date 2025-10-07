@@ -13,7 +13,7 @@ function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { status } = useSession();
-  const callbackUrl = searchParams.get('callbackUrl') || '/tailor';
+  const callbackUrl = searchParams.get('callbackUrl') || '/gen';
 
   // Redirect authenticated users
   useEffect(() => {
@@ -68,10 +68,6 @@ function AuthContent() {
 
       <div className="flex items-center justify-center px-4 pt-16">
         <div className="max-w-md w-full space-y-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold mb-2 text-white">Welcome to TailorApply</h1>
-          </div>
-
           <div className="bg-stone-950 rounded-lg shadow-lg p-8 border border-stone-700">
             <div className="space-y-4">
               {/* GitHub Sign In Button */}

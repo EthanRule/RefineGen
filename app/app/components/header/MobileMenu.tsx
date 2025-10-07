@@ -1,10 +1,9 @@
-"use client";
+'use client';
 
-import { useSession, signOut } from "next-auth/react";
-import { usePathname } from "next/navigation";
-import HeaderNavigation from "./HeaderNavigation";
-import HeaderButton from "./HeaderButton";
-import LoadingCard from "../ui/LoadingCard";
+import { useSession, signOut } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
+import HeaderButton from './HeaderButton';
+import LoadingCard from '../ui/LoadingCard';
 
 interface MobileMenuProps {
   isMenuOpen: boolean;
@@ -13,15 +12,13 @@ interface MobileMenuProps {
 export default function MobileMenu({ isMenuOpen }: MobileMenuProps) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-  const isAuthPage = pathname === "/auth";
+  const isAuthPage = pathname === '/auth';
 
   if (!isMenuOpen) return null;
 
   return (
     <div className="md:hidden">
       <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gray-900 border-t border-gray-800">
-        <HeaderNavigation isMobile={true} isAuthPage={isAuthPage} />
-
         {session ? (
           <div className="px-3 py-2 text-gray-300 border-b border-gray-800 flex items-center space-x-3">
             {session.user?.image && (

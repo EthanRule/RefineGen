@@ -14,15 +14,7 @@ export default function Footer({ props }: { props: { status: string; session: an
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               {/* Brand */}
               <div className="col-span-1 md:col-span-2">
-                <h3 className="text-2xl font-bold mb-4">
-                  <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-                    genRudar
-                  </span>
-                </h3>
-                <p className="text-gray-400 mb-4 max-w-md">
-                  Your AI-powered creative platform. Generate stunning images, refine with
-                  precision, and bring your vision to life in seconds.
-                </p>
+                <h3 className="text-2xl font-bold mb-4"></h3>
                 <div className="flex space-x-4">
                   <a
                     href="https://github.com/EthanRule"
@@ -49,9 +41,9 @@ export default function Footer({ props }: { props: { status: string; session: an
                 </div>
               </div>
 
-              {/* Product */}
+              {/* How this works */}
               <div>
-                <h4 className="text-lg font-semibold mb-4">Product</h4>
+                <h4 className="text-lg font-semibold mb-4">How this works</h4>
                 <ul className="space-y-2">
                   <li>
                     <a href="#" className="text-gray-400 hover:text-white transition-colors">
@@ -61,16 +53,6 @@ export default function Footer({ props }: { props: { status: string; session: an
                   <li>
                     <a href="#" className="text-gray-400 hover:text-white transition-colors">
                       AI Refinement
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                      Gallery
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                      API Access
                     </a>
                   </li>
                 </ul>
@@ -109,7 +91,7 @@ export default function Footer({ props }: { props: { status: string; session: an
             </div>
 
             <div className="border-t border-gray-800 mt-8 pt-8 flex justify-between items-center">
-              <p className="text-gray-400">© {currentYear} Genrudar. All rights reserved.</p>
+              <p className="text-gray-400">© {currentYear} genRudar. All rights reserved.</p>
               {session && (
                 <button
                   onClick={() => signOut()}

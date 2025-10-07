@@ -1,14 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import HeaderLogo from './header/HeaderLogo';
-import HeaderNavigation from './header/HeaderNavigation';
 import HeaderButton from './header/HeaderButton';
 import MobileMenuButton from './header/MobileMenuButton';
 import MobileMenu from './header/MobileMenu';
-import LoadingCard from './ui/LoadingCard';
 
 export default function Header({ props }: { props: { status: string; session: any } }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -20,28 +18,21 @@ export default function Header({ props }: { props: { status: string; session: an
     <header className="bg-black sticky top-0 z-50">
       <div className="mx-2 mt-2">
         <div className="bg-stone-950 rounded-lg shadow-lg border border-stone-700">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
+          <div className="px-8">
+            <div className="flex justify-between items-center h-14">
               <HeaderLogo />
-
-              <HeaderNavigation isAuthPage={isAuthPage} />
-
-              {/* User Actions */}
               <div className="hidden md:flex items-center space-x-4">
                 {session ? (
                   <div className="flex items-center space-x-3">
-                    <span className="text-gray-300">
-                      {session.user?.name || session.user?.email}
-                    </span>
                     {session.user?.image && (
                       <img
                         src={session.user.image}
                         alt="Profile"
-                        className="w-8 h-8 rounded-full border-2 border-gray-300"
+                        className="w-10 h-10 rounded-full border-1 border-stone-700"
                       />
                     )}
                     {!session.user?.image && (
-                      <div className="w-8 h-8 rounded-full border-2 border-gray-300 bg-gray-600 flex items-center justify-center text-xs text-white">
+                      <div className="w-10 h-10 rounded-full border-1 border-stone-700 bg-stone-600 flex items-center justify-center text-xs text-white">
                         {session.user?.name?.charAt(0) || '?'}
                       </div>
                     )}
@@ -49,7 +40,7 @@ export default function Header({ props }: { props: { status: string; session: an
                 ) : (
                   !isAuthPage && (
                     <HeaderButton href="/auth">
-                      <img src="/github.png" alt="GitHub" className="w-5 h-5" />
+                      <img src="/google.png" alt="GitHub" className="w-5 h-5" />
                       Sign up
                     </HeaderButton>
                   )

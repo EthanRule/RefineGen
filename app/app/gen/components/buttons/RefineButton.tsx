@@ -48,13 +48,13 @@ export default function RefineButton({
   };
 
   const getButtonClass = (isProcessing: boolean) => {
-    const baseClass = 'px-4 py-2 rounded-lg font-semibold transition-colors text-white';
+    const baseClass = 'px-4 py-2 rounded-lg font-semibold transition-colors text-stone-950';
 
     if (isDisabled || isProcessing) {
-      return `${baseClass} bg-gray-600 cursor-not-allowed`;
+      return `${baseClass} bg-cyan-400 cursor-not-allowed`;
     }
 
-    return `${baseClass} bg-purple-800 hover:bg-purple-900`;
+    return `${baseClass} bg-cyan-400 hover:bg-cyan-200`;
   };
 
   const showRefineSpinner = refineButtonState === 'refining';

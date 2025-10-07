@@ -2,12 +2,12 @@
 
 import { useRouter } from 'next/navigation';
 
-interface TailorHeaderProps {
+interface GenHeaderProps {
   onToggleGallery?: () => void;
   isGalleryOpen?: boolean;
 }
 
-export default function TailorHeader({ onToggleGallery, isGalleryOpen }: TailorHeaderProps) {
+export default function GenHeader({ onToggleGallery, isGalleryOpen }: GenHeaderProps) {
   const router = useRouter();
 
   return (

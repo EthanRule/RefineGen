@@ -15,10 +15,10 @@ export default function HeroSection() {
 
     if (session) {
       // User is authenticated, go directly to tailor page
-      router.push("/tailor");
+      router.push("/gen");
     } else {
       // User is not authenticated, redirect to custom sign up page with callback
-      router.push("/auth?callbackUrl=/tailor");
+      router.push("/auth?callbackUrl=/gen");
     }
   };
 

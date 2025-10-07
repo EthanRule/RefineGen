@@ -9,7 +9,7 @@ import Footer from '../components/footer/Footer';
 import LoadingCard from '../components/ui/LoadingCard';
 import ControlPanel from './components/panels/ControlPanel';
 import ImageView from './components/panels/ImageView';
-import TailorHeader from './components/panels/TailorHeader';
+import GenHeader from './components/panels/GenHeader';
 import ImageGallery from './components/panels/ImageGallery';
 
 interface ImageGenerationResults {
@@ -33,7 +33,7 @@ interface SavedImage {
   createdAt: string;
 }
 
-export default function TailorClient() {
+export default function GenClient() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -359,7 +359,7 @@ export default function TailorClient() {
             isGalleryOpen ? 'w-4/5 mr-2' : 'w-full'
           }`}
         >
-          <TailorHeader onToggleGallery={handleToggleGallery} isGalleryOpen={isGalleryOpen} />
+          <GenHeader onToggleGallery={handleToggleGallery} isGalleryOpen={isGalleryOpen} />
           <div className="flex flex-1 justify-center min-h-0 py-[5vh] lg:py-[10vh]">
             <div className="w-full lg:w-3/5 h-full px-4 lg:px-0">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full items-stretch h-full max-h-full">
