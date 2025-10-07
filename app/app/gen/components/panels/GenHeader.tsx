@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
 interface GenHeaderProps {
   onToggleGallery?: () => void;
@@ -9,6 +10,28 @@ interface GenHeaderProps {
 
 export default function GenHeader({ onToggleGallery, isGalleryOpen }: GenHeaderProps) {
   const router = useRouter();
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 1024); // lg breakpoint
+    };
+
+    checkScreenSize();
+    window.addEventListener('resize', checkScreenSize);
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, []);
+
+  const handleGalleryToggle = () => {
+    if (isMobile) {
+      // On mobile, navigate to mobile gallery page
+      router.push('/gen/mobile-gallery');
+    } else {
+      // On desktop, toggle the sidebar
+      onToggleGallery?.();
+    }
+  };
 
   return (
     <div className="flex items-center justify-between px-6 py-4 flex-shrink-0">
@@ -30,13 +53,13 @@ export default function GenHeader({ onToggleGallery, isGalleryOpen }: GenHeaderP
       {/* Gallery Toggle Button */}
       <div className="flex items-center space-x-4">
         <button
-          onClick={onToggleGallery}
+          onClick={handleGalleryToggle}
           className={`p-2 rounded-lg transition-colors ${
-            isGalleryOpen
-              ? 'bg-purple-600 text-white'
-              : 'text-gray-400 hover:text-white hover:bg-zinc-800'
+            isGalleryOpen && !isMobile
+              ? 'bg-cyan-600 text-white'
+              : 'text-white-400 hover:text-white hover:bg-zinc-800'
           }`}
-          title={isGalleryOpen ? 'Close Gallery' : 'Open Gallery'}
+          title={isMobile ? 'Open Gallery' : isGalleryOpen ? 'Close Gallery' : 'Open Gallery'}
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path

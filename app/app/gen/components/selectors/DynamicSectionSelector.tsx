@@ -55,7 +55,7 @@ export default function DynamicSectionSelector({
           {PREDEFINED_SECTIONS.map((title, sectionIndex) => (
             <div
               key={sectionIndex}
-              className="bg-zinc-800 rounded-lg border border-zinc-700 flex items-center justify-center flex-1 min-h-0"
+              className="bg-zinc-800 rounded-lg border border-zinc-700 flex items-center justify-center flex-1 min-h-0 py-1 lg:py-0"
             >
               <p className="text-gray-500 text-sm text-center m-0">
                 Click "Refine" to generate options

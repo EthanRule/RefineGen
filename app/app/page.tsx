@@ -32,7 +32,7 @@ export default function Home() {
             <div className="max-w-4xl mx-auto">
               <button
                 onClick={handleGetStarted}
-                className="bg-cyan-400 hover:bg-cyan-200 text-black px-12 py-6 rounded-xl text-2xl font-bold shadow-lg hover:shadow-xl shadow-cyan-400/50 transform hover:scale-105 transition-all duration-500 ease-initial min-w-[400px]"
+                className="bg-cyan-400 hover:bg-cyan-200 text-black px-12 py-6 rounded-xl text-2xl font-bold shadow-lg hover:shadow-xl shadow-cyan-400/50 transform hover:scale-105 transition-all duration-500 ease-initial sm:min-w-[400px]"
               >
                 START
               </button>

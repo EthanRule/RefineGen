@@ -50,29 +50,24 @@ export default function RefineButton({
   const getButtonClass = (isProcessing: boolean) => {
     const baseClass = 'px-4 py-2 rounded-lg font-semibold transition-colors text-stone-950';
 
-    if (isDisabled || isProcessing) {
+    if (isDisabled) {
       return `${baseClass} bg-cyan-400 cursor-not-allowed`;
+    }
+
+    if (isProcessing) {
+      return `${baseClass} bg-cyan-600 cursor-not-allowed`;
     }
 
     return `${baseClass} bg-cyan-400 hover:bg-cyan-200`;
   };
 
-  const showRefineSpinner = refineButtonState === 'refining';
-
   return (
     <button
       onClick={handleRefine}
       disabled={isDisabled || refineButtonState === 'refining'}
-      className={`flex-1 ${getButtonClass(showRefineSpinner)}`}
+      className={`flex-1 ${getButtonClass(refineButtonState === 'refining')}`}
     >
-      {showRefineSpinner ? (
-        <div className="flex items-center justify-center space-x-2">
-          <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-sm">{getRefineButtonText()}</span>
-        </div>
-      ) : (
-        <span className="text-sm">{getRefineButtonText()}</span>
-      )}
+      <span className="text-sm">{getRefineButtonText()}</span>
     </button>
   );
 }

@@ -13,6 +13,7 @@ interface ImageViewProps {
   errorType?: string;
   isRetryable?: boolean;
   onRetry?: () => void;
+  isLoading?: boolean;
 }
 
 export default function ImageView({
@@ -21,6 +22,7 @@ export default function ImageView({
   errorType,
   isRetryable,
   onRetry,
+  isLoading = false,
 }: ImageViewProps) {
   return (
     <div className="lg:col-span-2 flex flex-col h-full">
@@ -31,6 +33,7 @@ export default function ImageView({
           errorType={errorType}
           isRetryable={isRetryable}
           onRetry={onRetry}
+          isLoading={isLoading}
         />
       </div>
       <div className="flex-shrink-0">

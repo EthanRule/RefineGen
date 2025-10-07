@@ -131,7 +131,7 @@ export default function ActionButtons({
       <button
         onClick={handleDownload}
         disabled={!imageUrl}
-        className="bg-purple-600 hover:bg-purple-700 text-white px-3 sm:px-6 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm flex-shrink-0"
+        className="bg-cyan-400 hover:bg-cyan-200 text-black px-3 sm:px-6 py-2 rounded-lg transition-colors flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm flex-shrink-0"
       >
         <svg
           className="w-3 h-3 sm:w-4 sm:h-4"

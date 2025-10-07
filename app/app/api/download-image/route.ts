@@ -33,6 +33,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 });
     }
 
+    // Block dangerous protocols first
+    if (
+      parsedUrl.protocol === 'file:' ||
+      parsedUrl.protocol === 'ftp:' ||
+      parsedUrl.protocol === 'data:'
+    ) {
+      return NextResponse.json({ error: 'Unsupported URL protocol' }, { status: 400 });
+    }
+
     // Only allow HTTPS URLs
     if (parsedUrl.protocol !== 'https:') {
       return NextResponse.json({ error: 'Only HTTPS URLs are allowed' }, { status: 400 });
@@ -46,20 +55,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Private URLs are not allowed' }, { status: 400 });
     }
 
-    // Block file:// and other dangerous protocols
-    if (
-      parsedUrl.protocol === 'file:' ||
-      parsedUrl.protocol === 'ftp:' ||
-      parsedUrl.protocol === 'data:'
-    ) {
-      return NextResponse.json({ error: 'Unsupported URL protocol' }, { status: 400 });
-    }
-
     // Fetch the image from the external URL with timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-    const response = await fetch(imageUrl, {
+    const fetchResponse = await fetch(imageUrl, {
       method: 'GET',
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; ImageDownloader/1.0)',
@@ -70,15 +70,15 @@ export async function POST(request: NextRequest) {
 
     clearTimeout(timeoutId);
 
-    if (!response.ok) {
+    if (!fetchResponse.ok) {
       return NextResponse.json(
-        { error: `Failed to fetch image: ${response.status}` },
-        { status: response.status }
+        { error: `Failed to fetch image: ${fetchResponse.status}` },
+        { status: fetchResponse.status }
       );
     }
 
     // Validate content type
-    const contentType = response.headers.get('content-type') || '';
+    const contentType = fetchResponse.headers.get('content-type') || '';
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (!allowedTypes.some(type => contentType.startsWith(type))) {
       return NextResponse.json(
@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check content length before downloading
-    const contentLength = response.headers.get('content-length');
+    const contentLength = fetchResponse.headers.get('content-length');
     const maxSize = 10 * 1024 * 1024; // 10MB limit
     if (contentLength && parseInt(contentLength) > maxSize) {
       return NextResponse.json(
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the image data
-    const imageBuffer = await response.arrayBuffer();
+    const imageBuffer = await fetchResponse.arrayBuffer();
 
     // Double-check size after download
     if (imageBuffer.byteLength > maxSize) {

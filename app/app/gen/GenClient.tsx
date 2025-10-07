@@ -381,6 +381,7 @@ export default function GenClient() {
                   errorType={errorType}
                   isRetryable={isRetryable}
                   onRetry={handleGenerateImage}
+                  isLoading={generateButtonState === 'generating'}
                 />
               </div>
             </div>
