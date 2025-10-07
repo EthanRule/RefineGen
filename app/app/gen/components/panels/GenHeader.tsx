@@ -58,7 +58,11 @@ export default function GenHeader({
       {/* Right Side: Token Count, Gem Icon, and Gallery Button */}
       <div className="flex items-center space-x-4">
         {/* Token Count and Gem Icon */}
-        <div className="flex items-center space-x-2 cursor-pointer group hover:bg-zinc-800 rounded-lg p-1 px-2 active:bg-zinc-700">
+        <button
+          onClick={() => router.push('/gems')}
+          className="flex items-center space-x-2 cursor-pointer group hover:bg-zinc-800 rounded-lg p-1 px-2 active:bg-zinc-700"
+          title="Purchase Gems"
+        >
           <span className="text-white font-semibold text-lg group-hover:text-green-200 transition-colors">
             {tokenCount}
           </span>
@@ -73,7 +77,7 @@ export default function GenHeader({
             </svg>
             <div className="absolute inset-0 bg-gradient-to-br from-green-300 to-green-600 rounded-full opacity-20"></div>
           </div>
-        </div>
+        </button>
         <button
           onClick={handleGalleryToggle}
           className={`p-2 rounded-lg transition-colors ${
