@@ -90,7 +90,7 @@ export default function GemsPage() {
                     onMouseLeave={() => setHoveredPackage(null)}
                   >
                     <div className="text-center">
-                      <div className="text-green-400 text-3xl font-bold mb-2">100</div>
+                      <div className="text-green-400 text-3xl font-bold mb-2">400</div>
                       <div className="text-white text-lg font-semibold mb-4">Gems</div>
                       <div className="text-gray-400 text-sm mb-6">
                         Perfect for trying out new features
@@ -113,7 +113,7 @@ export default function GemsPage() {
                       </span>
                     </div>
                     <div className="text-center">
-                      <div className="text-green-400 text-3xl font-bold mb-2">500</div>
+                      <div className="text-green-400 text-3xl font-bold mb-2">1800</div>
                       <div className="text-white text-lg font-semibold mb-4">Gems</div>
                       <div className="text-gray-400 text-sm mb-6">
                         Great value for regular users
@@ -131,13 +131,13 @@ export default function GemsPage() {
                     onMouseLeave={() => setHoveredPackage(null)}
                   >
                     <div className="text-center">
-                      <div className="text-green-400 text-3xl font-bold mb-2">1000</div>
+                      <div className="text-green-400 text-3xl font-bold mb-2">4000</div>
                       <div className="text-white text-lg font-semibold mb-4">Gems</div>
                       <div className="text-gray-400 text-sm mb-6">
                         Best value for power users
                       </div>
                       <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
-                        $34.99
+                        $39.99
                       </button>
                     </div>
                   </div>
