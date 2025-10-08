@@ -93,8 +93,8 @@ export default function DynamicSectionSelector({
                           onClick={() => onAttributeToggle(option)}
                           className={`px-3 py-1 rounded text-xs font-medium transition-all duration-200 max-w-32 truncate ${
                             isSelected
-                              ? 'bg-purple-600 text-white shadow-lg transform scale-105'
-                              : 'bg-gray-600 text-gray-300 hover:bg-gray-500 hover:text-white'
+                              ? 'bg-cyan-950 text-white shadow-lg transform scale-105'
+                              : 'bg-zinc-600 text-gray-300 hover:bg-zinc-500 hover:text-white'
                           }`}
                           title={option}
                         >
