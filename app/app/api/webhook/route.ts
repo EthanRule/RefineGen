@@ -2,12 +2,20 @@ import Stripe from 'stripe';
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 const prisma = new PrismaClient();
 
 // Helper function to get gem amount from any price ID
-async function getGemAmountFromPriceId(priceId: string): Promise<number | null> {
+async function getGemAmountFromPriceId(
+  priceId: string,
+  stripe: Stripe
+): Promise<number | null> {
   try {
+    // Check if Stripe key is configured
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('STRIPE_SECRET_KEY environment variable is not set');
+      return null;
+    }
+
     // First check our predefined plans
     if (priceId in GEM_PLANS) {
       return GEM_PLANS[priceId as keyof typeof GEM_PLANS];
@@ -40,6 +48,12 @@ const GEM_PLANS = {
 } as const;
 
 export async function POST(request: NextRequest) {
+  // Check if Stripe is configured
+  if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+    return NextResponse.json({ error: 'Stripe configuration missing' }, { status: 500 });
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
   const body = await request.text();
   const signature = request.headers.get('stripe-signature');
 
@@ -63,7 +77,7 @@ export async function POST(request: NextRequest) {
   try {
     switch (event.type) {
       case 'customer.subscription.created':
-        await handleSubscriptionCreated(event.data.object as Stripe.Subscription);
+        await handleSubscriptionCreated(event.data.object as Stripe.Subscription, stripe);
         break;
 
       case 'customer.subscription.updated':
@@ -75,11 +89,11 @@ export async function POST(request: NextRequest) {
         break;
 
       case 'invoice.payment_succeeded':
-        await handlePaymentSucceeded(event.data.object as Stripe.Invoice);
+        await handlePaymentSucceeded(event.data.object as Stripe.Invoice, stripe);
         break;
 
       case 'invoice.payment_failed':
-        await handlePaymentFailed(event.data.object as Stripe.Invoice);
+        await handlePaymentFailed(event.data.object as Stripe.Invoice, stripe);
         break;
 
       default:
@@ -93,7 +107,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
+async function handleSubscriptionCreated(subscription: Stripe.Subscription, stripe: Stripe) {
   const customerId = subscription.customer as string;
   const priceId = subscription.items.data[0]?.price.id;
 
@@ -102,7 +116,7 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
     return;
   }
 
-  const gemAmount = await getGemAmountFromPriceId(priceId);
+  const gemAmount = await getGemAmountFromPriceId(priceId, stripe);
 
   if (!gemAmount) {
     console.error('Invalid price ID:', priceId);
@@ -210,7 +224,7 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   console.log(`Subscription canceled for user ${user.id}`);
 }
 
-async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
+async function handlePaymentSucceeded(invoice: Stripe.Invoice, stripe: Stripe) {
   if (!(invoice as any).subscription) return;
 
   const subscription = await stripe.subscriptions.retrieve(
@@ -224,7 +238,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     return;
   }
 
-  const gemAmount = await getGemAmountFromPriceId(priceId);
+  const gemAmount = await getGemAmountFromPriceId(priceId, stripe);
 
   if (!gemAmount) {
     console.error('Invalid price ID:', priceId);
@@ -260,7 +274,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   console.log(`Payment succeeded for user ${user.id}, added ${gemAmount} gems`);
 }
 
-async function handlePaymentFailed(invoice: Stripe.Invoice) {
+async function handlePaymentFailed(invoice: Stripe.Invoice, stripe: Stripe) {
   if (!(invoice as any).subscription) return;
 
   const subscription = await stripe.subscriptions.retrieve(

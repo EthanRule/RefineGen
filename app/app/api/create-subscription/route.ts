@@ -4,17 +4,19 @@ import { getServerSession } from 'next-auth';
 import { authConfig } from '@/lib/auth';
 import { PrismaClient } from '@prisma/client';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 const prisma = new PrismaClient();
-
-// Check if Stripe key is configured
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.error('STRIPE_SECRET_KEY environment variable is not set');
-}
 
 // Helper function to get Price ID from payment link
 async function getPriceIdFromPaymentLink(paymentLinkUrl: string): Promise<string | null> {
   try {
+    // Check if Stripe key is configured
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('STRIPE_SECRET_KEY environment variable is not set');
+      return null;
+    }
+
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+
     // Extract the payment link ID from the URL
     const paymentLinkId = paymentLinkUrl.split('/').pop();
     if (!paymentLinkId) return null;
@@ -76,6 +78,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
     const session = await getServerSession(authConfig);
 
     if (!session?.user?.email) {
