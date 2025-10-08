@@ -4,16 +4,27 @@ interface GenerateButtonProps {
   onGenerate?: () => void;
   generateButtonState?: 'generate' | 'generating';
   disabled?: boolean;
+  tokenCount?: number;
 }
 
 export default function GenerateButton({
   onGenerate,
   generateButtonState = 'generate',
   disabled = false,
+  tokenCount = 0,
 }: GenerateButtonProps) {
   const handleGenerate = async () => {
     if (generateButtonState === 'generating') return;
     await onGenerate?.();
+  };
+
+  const isInsufficientTokens = tokenCount < 10;
+
+  const getTooltipText = () => {
+    if (isInsufficientTokens) {
+      return `Insufficient gems. You need 10 gems to generate an image. You have ${tokenCount} gems.`;
+    }
+    return '';
   };
 
   const getGenerateButtonText = () => {
@@ -44,7 +55,7 @@ export default function GenerateButton({
   const isGenerating = generateButtonState === 'generating';
 
   return (
-    <div className="flex flex-1 group">
+    <div className="flex flex-1 group" title={getTooltipText()}>
       {/* Main Generate Button */}
       <button
         onClick={handleGenerate}
@@ -63,7 +74,7 @@ export default function GenerateButton({
         onClick={handleGenerate}
         disabled={disabled || isGenerating}
         className={`px-2 py-2 rounded-r-lg transition-colors ${
-          disabled || isGenerating
+          isGenerating
             ? 'bg-stone-900 cursor-not-allowed'
             : 'bg-stone-800 group-hover:bg-stone-700'
         }`}
@@ -71,9 +82,7 @@ export default function GenerateButton({
         <div className="flex items-center space-x-1">
           <svg
             className={`w-4 h-4 transition-colors ${
-              disabled || isGenerating
-                ? 'text-red-400'
-                : 'text-green-400 group-hover:text-red-400'
+              isGenerating ? 'text-red-400' : 'text-green-400 group-hover:text-red-400'
             }`}
             fill="currentColor"
             viewBox="0 0 24 24"
@@ -83,9 +92,7 @@ export default function GenerateButton({
           </svg>
           <span
             className={`text-xs font-semibold transition-colors ${
-              disabled || isGenerating
-                ? 'text-red-400'
-                : 'text-green-400 group-hover:text-red-400'
+              isGenerating ? 'text-red-400' : 'text-green-400 group-hover:text-red-400'
             }`}
           >
             10

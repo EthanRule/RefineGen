@@ -5,6 +5,7 @@ interface RefineButtonProps {
   refineButtonState?: 'refine' | 'refining';
   disabled?: boolean;
   refinementCount?: number;
+  tokenCount?: number;
 }
 
 export default function RefineButton({
@@ -12,6 +13,7 @@ export default function RefineButton({
   refineButtonState = 'refine',
   disabled = false,
   refinementCount = 0,
+  tokenCount = 0,
 }: RefineButtonProps) {
   const handleRefine = async () => {
     if (refineButtonState === 'refining' || refinementCount >= 10) return;
@@ -20,6 +22,17 @@ export default function RefineButton({
 
   const isAtLimit = refinementCount >= 10;
   const isDisabled = disabled || isAtLimit;
+  const isInsufficientTokens = tokenCount < 3;
+
+  const getTooltipText = () => {
+    if (isAtLimit) {
+      return 'Maximum 10 refinements reached. Generate an image to reset.';
+    }
+    if (isInsufficientTokens) {
+      return `Insufficient gems. You need 3 gems to refine. You have ${tokenCount} gems.`;
+    }
+    return '';
+  };
 
   const getRefineButtonText = () => {
     if (isAtLimit) {
@@ -62,7 +75,7 @@ export default function RefineButton({
   };
 
   return (
-    <div className="flex flex-1 group">
+    <div className="flex flex-1 group" title={getTooltipText()}>
       {/* Main Refine Button */}
       <button
         onClick={handleRefine}
@@ -81,7 +94,7 @@ export default function RefineButton({
         onClick={handleRefine}
         disabled={isDisabled || refineButtonState === 'refining'}
         className={`px-2 py-2 rounded-r-lg transition-colors ${
-          isDisabled || refineButtonState === 'refining'
+          refineButtonState === 'refining'
             ? 'bg-stone-900 cursor-not-allowed'
             : 'bg-stone-800 group-hover:bg-stone-700'
         }`}
@@ -89,7 +102,7 @@ export default function RefineButton({
         <div className="flex items-center space-x-1">
           <svg
             className={`w-4 h-4 transition-colors ${
-              isDisabled || refineButtonState === 'refining'
+              refineButtonState === 'refining'
                 ? 'text-red-400'
                 : 'text-green-400 group-hover:text-yellow-400'
             }`}
@@ -101,7 +114,7 @@ export default function RefineButton({
           </svg>
           <span
             className={`text-xs font-semibold transition-colors ${
-              isDisabled || refineButtonState === 'refining'
+              refineButtonState === 'refining'
                 ? 'text-red-400'
                 : 'text-green-400 group-hover:text-yellow-400'
             }`}

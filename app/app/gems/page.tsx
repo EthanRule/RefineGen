@@ -7,6 +7,7 @@ export default function GemsPage() {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
   const [hoveredPackage, setHoveredPackage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<string | null>(null);
 
   // Detect mobile screen size
   useEffect(() => {
@@ -18,6 +19,35 @@ export default function GemsPage() {
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
+
+  // Handle subscription creation
+  const handleSubscribe = async (priceId: string) => {
+    setIsLoading(priceId);
+    try {
+      const response = await fetch('/api/create-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ priceId }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      } else {
+        console.error('Error creating subscription:', data.error);
+        alert('Failed to create subscription. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error creating subscription:', error);
+      alert('Failed to create subscription. Please try again.');
+    } finally {
+      setIsLoading(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black flex flex-col overflow-y-auto lg:overflow-hidden lg:h-screen">
@@ -95,8 +125,12 @@ export default function GemsPage() {
                       <div className="text-gray-400 text-sm mb-6">
                         Perfect for trying out new features
                       </div>
-                      <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
-                        $4.99
+                      <button
+                        onClick={() => handleSubscribe('price_400_gems')}
+                        disabled={isLoading === 'price_400_gems'}
+                        className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                      >
+                        {isLoading === 'price_400_gems' ? 'Loading...' : '$4.99/month'}
                       </button>
                     </div>
                   </div>
@@ -118,8 +152,12 @@ export default function GemsPage() {
                       <div className="text-gray-400 text-sm mb-6">
                         Great value for regular users
                       </div>
-                      <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
-                        $19.99
+                      <button
+                        onClick={() => handleSubscribe('price_1800_gems')}
+                        disabled={isLoading === 'price_1800_gems'}
+                        className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                      >
+                        {isLoading === 'price_1800_gems' ? 'Loading...' : '$19.99/month'}
                       </button>
                     </div>
                   </div>
@@ -136,8 +174,12 @@ export default function GemsPage() {
                       <div className="text-gray-400 text-sm mb-6">
                         Best value for power users
                       </div>
-                      <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors">
-                        $39.99
+                      <button
+                        onClick={() => handleSubscribe('price_4000_gems')}
+                        disabled={isLoading === 'price_4000_gems'}
+                        className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
+                      >
+                        {isLoading === 'price_4000_gems' ? 'Loading...' : '$39.99/month'}
                       </button>
                     </div>
                   </div>

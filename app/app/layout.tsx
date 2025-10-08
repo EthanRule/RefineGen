@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'genRudar',
+  title: 'RefineGen',
   description:
     'Your AI-powered creative platform. Generate stunning images, refine with precision, and bring your vision to life in seconds.',
   icons: {

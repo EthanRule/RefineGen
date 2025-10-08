@@ -19,6 +19,8 @@ interface ControlPanelProps {
   refineButtonState?: 'refine' | 'refining';
   generateButtonState?: 'generate' | 'generating';
   refinementCount?: number;
+  tokenCount?: number;
+  isLoadingTokens?: boolean;
 }
 
 export default function ControlPanel({
@@ -32,6 +34,8 @@ export default function ControlPanel({
   refineButtonState = 'refine',
   generateButtonState = 'generate',
   refinementCount = 0,
+  tokenCount = 0,
+  isLoadingTokens = false,
 }: ControlPanelProps) {
   return (
     <div className="lg:col-span-1 flex flex-col h-full max-h-[calc(100vh-20vh)]">
@@ -57,8 +61,15 @@ export default function ControlPanel({
             onRefine={onRefine}
             refineButtonState={refineButtonState}
             refinementCount={refinementCount}
+            disabled={tokenCount < 3}
+            tokenCount={tokenCount}
           />
-          <GenerateButton onGenerate={onGenerate} generateButtonState={generateButtonState} />
+          <GenerateButton
+            onGenerate={onGenerate}
+            generateButtonState={generateButtonState}
+            disabled={tokenCount < 10}
+            tokenCount={tokenCount}
+          />
         </div>
       </div>
     </div>

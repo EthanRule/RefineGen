@@ -62,7 +62,31 @@ export default function GenClient() {
   );
   const [refinementCount, setRefinementCount] = useState<number>(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
-  const [tokenCount, setTokenCount] = useState<number>(100); // Default token count
+  const [tokenCount, setTokenCount] = useState<number>(0); // Start with 0, will be fetched
+  const [isLoadingTokens, setIsLoadingTokens] = useState<boolean>(true); // Track token loading state
+
+  // Function to refresh token count
+  const refreshTokenCount = async () => {
+    await fetchTokenCount();
+  };
+
+  // Function to fetch user's token count
+  const fetchTokenCount = async () => {
+    setIsLoadingTokens(true);
+    try {
+      const response = await fetch('/api/user-tokens');
+      if (response.ok) {
+        const data = await response.json();
+        setTokenCount(data.tokens_remaining || 0);
+      } else {
+        console.error('Failed to fetch token count:', await response.text());
+      }
+    } catch (error) {
+      console.error('Error fetching token count:', error);
+    } finally {
+      setIsLoadingTokens(false);
+    }
+  };
 
   // Function to fetch user's saved images
   const fetchImages = async () => {
@@ -84,6 +108,25 @@ export default function GenClient() {
     }
   };
 
+  // Fetch token count when component mounts and when session changes
+  useEffect(() => {
+    if (session?.user?.email) {
+      fetchTokenCount();
+    }
+  }, [session?.user?.email]);
+
+  // Refresh token count when page becomes visible (user might have purchased gems)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && session?.user?.email) {
+        fetchTokenCount();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [session?.user?.email]);
+
   // Fetch images when gallery opens
   useEffect(() => {
     if (isGalleryOpen) {
@@ -92,6 +135,13 @@ export default function GenClient() {
   }, [isGalleryOpen]);
 
   const handleRefine = async () => {
+    // Check if user has sufficient tokens (3 gems for refinement)
+    if (tokenCount < 3) {
+      setError('Insufficient gems. You need 3 gems to refine. Please purchase more gems.');
+      setErrorType('insufficient_tokens');
+      return;
+    }
+
     // Check refinement limit
     if (refinementCount >= 10) {
       setError('Maximum 10 refinements allowed. Please generate an image to reset.');
@@ -112,11 +162,55 @@ export default function GenClient() {
     // Generate section options for the prompt
     await generateSectionOptions(imagePrompt.trim());
 
+    // Deduct 3 tokens from database
+    try {
+      const deductResponse = await fetch('/api/deduct-tokens', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'refine',
+          tokensUsed: 3,
+        }),
+      });
+
+      if (deductResponse.ok) {
+        const deductData = await deductResponse.json();
+        setTokenCount(deductData.tokens_remaining);
+      } else {
+        const errorData = await deductResponse.json();
+        console.error('Failed to deduct tokens:', errorData);
+
+        // If insufficient tokens, show error and refresh count
+        if (errorData.error === 'Insufficient tokens') {
+          setError('Insufficient gems. You need 3 gems to refine. Please purchase more gems.');
+          setErrorType('insufficient_tokens');
+          setRefineButtonState('refine');
+          await refreshTokenCount();
+          return;
+        }
+      }
+    } catch (error) {
+      console.error('Error deducting tokens:', error);
+      // Revert the local count if database deduction failed
+      setTokenCount(prev => prev + 3);
+    }
+
     // Increment refinement count
     setRefinementCount(prev => prev + 1);
   };
 
   const handleGenerateImage = async () => {
+    // Check if user has sufficient tokens (10 gems for generation)
+    if (tokenCount < 10) {
+      setError(
+        'Insufficient gems. You need 10 gems to generate an image. Please purchase more gems.'
+      );
+      setErrorType('insufficient_tokens');
+      return;
+    }
+
     if (!imagePrompt.trim()) {
       setError('Please enter an image prompt');
       return;
@@ -191,6 +285,41 @@ export default function GenClient() {
 
       setGeneratedImage(data);
       setGenerateButtonState('generate'); // Reset to generate for next image
+
+      // Deduct 10 tokens from database after successful generation
+      try {
+        const deductResponse = await fetch('/api/deduct-tokens', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'generate',
+            tokensUsed: 10,
+          }),
+        });
+
+        if (deductResponse.ok) {
+          const deductData = await deductResponse.json();
+          setTokenCount(deductData.tokens_remaining);
+        } else {
+          const errorData = await deductResponse.json();
+          console.error('Failed to deduct tokens:', errorData);
+
+          // If insufficient tokens, show error and refresh count
+          if (errorData.error === 'Insufficient tokens') {
+            setError(
+              'Insufficient gems. You need 10 gems to generate an image. Please purchase more gems.'
+            );
+            setErrorType('insufficient_tokens');
+            setGenerateButtonState('generate');
+            await refreshTokenCount();
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('Error deducting tokens:', error);
+      }
 
       // Save image to S3 and database
       try {
@@ -364,6 +493,7 @@ export default function GenClient() {
             onToggleGallery={handleToggleGallery}
             isGalleryOpen={isGalleryOpen}
             tokenCount={tokenCount}
+            isLoadingTokens={isLoadingTokens}
           />
           <div className="flex flex-1 justify-center min-h-0 py-[5vh] lg:py-[10vh]">
             <div className="w-full lg:w-3/5 h-full px-4 lg:px-0">
@@ -379,6 +509,8 @@ export default function GenClient() {
                   refineButtonState={refineButtonState}
                   generateButtonState={generateButtonState}
                   refinementCount={refinementCount}
+                  tokenCount={tokenCount}
+                  isLoadingTokens={isLoadingTokens}
                 />
                 <ImageView
                   generatedImage={generatedImage}
