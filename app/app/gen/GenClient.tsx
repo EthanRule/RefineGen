@@ -64,6 +64,69 @@ export default function GenClient() {
   const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
   const [tokenCount, setTokenCount] = useState<number>(0); // Start with 0, will be fetched
   const [isLoadingTokens, setIsLoadingTokens] = useState<boolean>(true); // Track token loading state
+  const [recentImageUrl, setRecentImageUrl] = useState<string | null>(null); // Most recent image for background
+  const [isImageLoaded, setIsImageLoaded] = useState<boolean>(false); // Track if background image is loaded
+  const [isFadingOut, setIsFadingOut] = useState<boolean>(false); // Track if old image is fading out
+
+  // Function to fetch user's most recent image for background
+  const fetchRecentImage = async () => {
+    try {
+      const response = await fetch('/api/recent-image');
+      if (response.ok) {
+        const data = await response.json();
+        const imageUrl = data.recentImage?.publicUrl || null;
+
+        if (imageUrl && imageUrl !== recentImageUrl) {
+          // Start fade out of current image
+          setIsFadingOut(true);
+
+          // Wait for fade out to complete (5 seconds)
+          setTimeout(() => {
+            // Reset loaded state and set new image
+            setIsImageLoaded(false);
+            setRecentImageUrl(imageUrl);
+            setIsFadingOut(false);
+
+            // Preload the new image
+            const img = new Image();
+            img.onload = () => {
+              setIsImageLoaded(true);
+            };
+            img.onerror = () => {
+              console.error('Failed to load background image');
+              setIsImageLoaded(false);
+            };
+            img.src = imageUrl;
+          }, 5000); // Wait 5 seconds for fade out
+        } else if (imageUrl === recentImageUrl) {
+          // Same image, just ensure it's loaded
+          if (!isImageLoaded) {
+            const img = new Image();
+            img.onload = () => {
+              setIsImageLoaded(true);
+            };
+            img.onerror = () => {
+              console.error('Failed to load background image');
+              setIsImageLoaded(false);
+            };
+            img.src = imageUrl;
+          }
+        } else {
+          // No image, fade out current one
+          setIsFadingOut(true);
+          setTimeout(() => {
+            setRecentImageUrl(null);
+            setIsImageLoaded(false);
+            setIsFadingOut(false);
+          }, 5000);
+        }
+      } else {
+        console.error('Failed to fetch recent image:', await response.text());
+      }
+    } catch (error) {
+      console.error('Error fetching recent image:', error);
+    }
+  };
 
   // Function to refresh token count
   const refreshTokenCount = async () => {
@@ -112,6 +175,7 @@ export default function GenClient() {
   useEffect(() => {
     if (session?.user?.email) {
       fetchTokenCount();
+      fetchRecentImage(); // Also fetch recent image
     }
   }, [session?.user?.email]);
 
@@ -340,6 +404,28 @@ export default function GenClient() {
           const saveData = await saveResponse.json();
           console.log('✅ Image saved successfully:', saveData);
 
+          // Update recent image for background with crossfade
+          setIsFadingOut(true);
+
+          // Wait for fade out to complete (5 seconds)
+          setTimeout(() => {
+            // Reset loaded state and set new image
+            setIsImageLoaded(false);
+            setRecentImageUrl(data.imageUrl);
+            setIsFadingOut(false);
+
+            // Preload the new image
+            const img = new Image();
+            img.onload = () => {
+              setIsImageLoaded(true);
+            };
+            img.onerror = () => {
+              console.error('Failed to load new background image');
+              setIsImageLoaded(false);
+            };
+            img.src = data.imageUrl;
+          }, 5000); // Wait 5 seconds for fade out
+
           // Refresh gallery if it's open
           if (isGalleryOpen) {
             fetchImages();
@@ -485,41 +571,60 @@ export default function GenClient() {
     <div className="min-h-screen bg-black flex flex-col overflow-y-auto lg:overflow-hidden lg:h-screen">
       <main className="flex-1 flex mx-2 my-2">
         <div
-          className={`bg-stone-950 rounded-lg shadow-lg border border-stone-700 flex flex-col min-h-[calc(100vh-1rem)] lg:max-h-[calc(100vh-1rem)] transition-all duration-300 ease-in-out ${
+          className={`bg-stone-950 rounded-lg shadow-lg border border-stone-700 flex flex-col min-h-[calc(100vh-1rem)] lg:max-h-[calc(100vh-1rem)] transition-all duration-300 ease-in-out relative overflow-hidden ${
             isGalleryOpen ? 'w-4/5 mr-2' : 'w-full'
           }`}
         >
-          <GenHeader
-            onToggleGallery={handleToggleGallery}
-            isGalleryOpen={isGalleryOpen}
-            tokenCount={tokenCount}
-            isLoadingTokens={isLoadingTokens}
-          />
-          <div className="flex flex-1 justify-center min-h-0 py-[5vh] lg:py-[10vh]">
-            <div className="w-full lg:w-3/5 h-full px-4 lg:px-0">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full items-stretch h-full max-h-full">
-                <ControlPanel
-                  onPromptChange={handlePromptChange}
-                  onRefine={handleRefine}
-                  onGenerate={handleGenerateImage}
-                  sections={sections}
-                  selectedAttributes={selectedAttributes}
-                  onAttributeToggle={handleAttributeToggle}
-                  isLoadingAttributes={isLoadingAttributes}
-                  refineButtonState={refineButtonState}
-                  generateButtonState={generateButtonState}
-                  refinementCount={refinementCount}
-                  tokenCount={tokenCount}
-                  isLoadingTokens={isLoadingTokens}
-                />
-                <ImageView
-                  generatedImage={generatedImage}
-                  error={error}
-                  errorType={errorType}
-                  isRetryable={isRetryable}
-                  onRetry={handleGenerateImage}
-                  isLoading={generateButtonState === 'generating'}
-                />
+          {/* Background Image */}
+          {recentImageUrl && (
+            <div className="absolute inset-0 z-0">
+              <div
+                className={`w-full h-full bg-cover bg-center bg-no-repeat transition-opacity duration-[5000ms] ease-in-out ${
+                  isFadingOut ? 'opacity-0' : isImageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                style={{
+                  backgroundImage: `url(${recentImageUrl})`,
+                  filter: 'blur(20px) brightness(0.15)', // Made darker (0.15 instead of 0.3)
+                  transform: 'scale(1.1)', // Slightly larger to avoid blur edges
+                }}
+              />
+            </div>
+          )}
+
+          {/* Content with higher z-index */}
+          <div className="relative z-10 flex flex-col h-full">
+            <GenHeader
+              onToggleGallery={handleToggleGallery}
+              isGalleryOpen={isGalleryOpen}
+              tokenCount={tokenCount}
+              isLoadingTokens={isLoadingTokens}
+            />
+            <div className="flex flex-1 justify-center min-h-0 py-[5vh] lg:py-[10vh]">
+              <div className="w-full lg:w-3/5 h-full px-4 lg:px-0">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full items-stretch h-full max-h-full">
+                  <ControlPanel
+                    onPromptChange={handlePromptChange}
+                    onRefine={handleRefine}
+                    onGenerate={handleGenerateImage}
+                    sections={sections}
+                    selectedAttributes={selectedAttributes}
+                    onAttributeToggle={handleAttributeToggle}
+                    isLoadingAttributes={isLoadingAttributes}
+                    refineButtonState={refineButtonState}
+                    generateButtonState={generateButtonState}
+                    refinementCount={refinementCount}
+                    tokenCount={tokenCount}
+                    isLoadingTokens={isLoadingTokens}
+                  />
+                  <ImageView
+                    generatedImage={generatedImage}
+                    error={error}
+                    errorType={errorType}
+                    isRetryable={isRetryable}
+                    onRetry={handleGenerateImage}
+                    isLoading={generateButtonState === 'generating'}
+                  />
+                </div>
               </div>
             </div>
           </div>
