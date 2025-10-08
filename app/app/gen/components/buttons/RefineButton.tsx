@@ -48,7 +48,7 @@ export default function RefineButton({
   };
 
   const getButtonClass = (isProcessing: boolean) => {
-    const baseClass = 'px-2 py-2 rounded-lg font-semibold transition-colors text-stone-950';
+    const baseClass = 'px-4 py-2 rounded-lg font-semibold transition-colors text-stone-950';
 
     if (isDisabled) {
       return `${baseClass} bg-cyan-400 cursor-not-allowed`;
@@ -62,37 +62,54 @@ export default function RefineButton({
   };
 
   return (
-    <button
-      onClick={handleRefine}
-      disabled={isDisabled || refineButtonState === 'refining'}
-      className={`flex-1 group ${getButtonClass(
-        refineButtonState === 'refining'
-      )} relative overflow-hidden`}
-    >
-      {/* Stone-800 background with proper slanted mask */}
-      <div
-        className="absolute right-0 top-0 bottom-0 w-1/2 bg-stone-800"
-        style={{
-          clipPath: 'polygon(20% 0%, 100% 0%, 100% 100%, 0% 100%)',
-        }}
-      ></div>
-
-      <div className="flex items-center justify-between w-full px-0 relative z-10">
+    <div className="flex flex-1 group">
+      {/* Main Refine Button */}
+      <button
+        onClick={handleRefine}
+        disabled={isDisabled || refineButtonState === 'refining'}
+        className={`flex-1 rounded-l-lg rounded-r-none ${
+          isDisabled || refineButtonState === 'refining'
+            ? getButtonClass(true)
+            : `group-hover:bg-cyan-200 ${getButtonClass(false)}`
+        }`}
+      >
         <span className="text-sm">{getRefineButtonText()}</span>
+      </button>
+
+      {/* Gem Cost Button */}
+      <button
+        onClick={handleRefine}
+        disabled={isDisabled || refineButtonState === 'refining'}
+        className={`px-2 py-2 rounded-r-lg transition-colors ${
+          isDisabled || refineButtonState === 'refining'
+            ? 'bg-stone-900 cursor-not-allowed'
+            : 'bg-stone-800 group-hover:bg-stone-700'
+        }`}
+      >
         <div className="flex items-center space-x-1">
           <svg
-            className="w-4 h-4 text-green-400 group-hover:text-yellow-400 transition-colors"
+            className={`w-4 h-4 transition-colors ${
+              isDisabled || refineButtonState === 'refining'
+                ? 'text-red-400'
+                : 'text-green-400 group-hover:text-yellow-400'
+            }`}
             fill="currentColor"
             viewBox="0 0 24 24"
             style={{ transform: 'scaleY(-1)' }}
           >
             <path d="M12 2L6 8L12 14L18 8L12 2ZM6 8L12 14L6 20L6 8ZM18 8L12 14L18 20L18 8Z" />
           </svg>
-          <span className="text-xs text-green-400 group-hover:text-yellow-400 font-semibold transition-colors">
+          <span
+            className={`text-xs font-semibold transition-colors ${
+              isDisabled || refineButtonState === 'refining'
+                ? 'text-red-400'
+                : 'text-green-400 group-hover:text-yellow-400'
+            }`}
+          >
             3
           </span>
         </div>
-      </div>
-    </button>
+      </button>
+    </div>
   );
 }

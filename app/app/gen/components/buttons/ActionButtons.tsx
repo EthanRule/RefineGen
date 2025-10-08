@@ -125,7 +125,7 @@ export default function ActionButtons({
         type="text"
         value={filename}
         onChange={handleFilenameChange}
-        className="flex-1 px-2 sm:px-3 py-2 border border-gray-500 bg-gray-700 text-white rounded-lg focus:border-transparent placeholder-gray-400 text-xs sm:text-sm min-w-0"
+        className="flex-1 px-2 sm:px-3 py-2 bg-zinc-800 text-white rounded-lg focus:outline-none focus:ring-0 placeholder-gray-400 text-xs sm:text-sm min-w-0"
         placeholder="image.png"
       />
       <button
@@ -146,7 +146,7 @@ export default function ActionButtons({
             d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
           />
         </svg>
-        <span className="hidden sm:inline">Download Image</span>
+        <span className="hidden sm:inline font-bold">Download</span>
         <span className="sm:hidden">Download</span>
       </button>
     </div>
