@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import HeaderLogo from './header/HeaderLogo';
@@ -10,9 +10,22 @@ import MobileMenu from './header/MobileMenu';
 
 export default function Header({ props }: { props: { status: string; session: any } }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isBackgroundLoaded, setIsBackgroundLoaded] = useState(false);
   const { data: session, status } = useSession();
   const pathname = usePathname();
   const isAuthPage = pathname === '/auth';
+
+  // Handle background image loading and fade-in
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      // Wait for image to render, then start fade-in
+      setTimeout(() => {
+        setIsBackgroundLoaded(true);
+      }, 100);
+    };
+    img.src = '/background.png';
+  }, []);
 
   return (
     <header className="bg-black sticky top-0 z-50">
@@ -21,7 +34,9 @@ export default function Header({ props }: { props: { status: string; session: an
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
             <div
-              className="w-full h-full bg-cover bg-center bg-no-repeat opacity-100"
+              className={`w-full h-full bg-cover bg-center bg-no-repeat transition-opacity duration-[5000ms] ease-in-out ${
+                isBackgroundLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
               style={{
                 backgroundImage: `url('/background.png')`,
                 filter: 'brightness(0.2)',

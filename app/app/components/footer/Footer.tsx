@@ -1,10 +1,24 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { signOut } from 'next-auth/react';
 
 export default function Footer({ props }: { props: { status: string; session: any } }) {
   const currentYear = new Date().getFullYear();
   const { status, session } = props;
+  const [isBackgroundLoaded, setIsBackgroundLoaded] = useState(false);
+
+  // Handle background image loading and fade-in
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      // Wait for image to render, then start fade-in
+      setTimeout(() => {
+        setIsBackgroundLoaded(true);
+      }, 100);
+    };
+    img.src = '/background.png';
+  }, []);
 
   return (
     <footer className="bg-black text-white h-full flex flex-col">
@@ -13,7 +27,9 @@ export default function Footer({ props }: { props: { status: string; session: an
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
             <div
-              className="w-full h-full bg-cover bg-center bg-no-repeat opacity-100"
+              className={`w-full h-full bg-cover bg-center bg-no-repeat transition-opacity duration-[5000ms] ease-in-out ${
+                isBackgroundLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
               style={{
                 backgroundImage: `url('/background.png')`,
                 filter: 'brightness(0.2)',

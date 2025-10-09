@@ -12,6 +12,7 @@ export default function Home() {
   const [isFooterOpen, setIsFooterOpen] = useState(false);
   const [showFooter, setShowFooter] = useState(false);
   const [footerVisible, setFooterVisible] = useState(false);
+  const [isBackgroundLoaded, setIsBackgroundLoaded] = useState(false);
 
   const handleGetStarted = () => {
     if (status === 'authenticated') {
@@ -51,6 +52,18 @@ export default function Home() {
     }
   }, [isFooterOpen]);
 
+  // Handle background image loading and fade-in
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => {
+      // Wait for image to render, then start fade-in
+      setTimeout(() => {
+        setIsBackgroundLoaded(true);
+      }, 100);
+    };
+    img.src = '/background.png';
+  }, []);
+
   return (
     <div className="bg-black flex flex-col h-screen overflow-hidden">
       <Header props={{ status, session }} />
@@ -63,7 +76,9 @@ export default function Home() {
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
             <div
-              className="w-full h-full bg-cover bg-center bg-no-repeat opacity-100"
+              className={`w-full h-full bg-cover bg-center bg-no-repeat transition-opacity duration-[5000ms] ease-in-out ${
+                isBackgroundLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
               style={{
                 backgroundImage: `url('/background.png')`,
                 filter: ' brightness(0.2)',
