@@ -79,7 +79,8 @@ export async function GET(request: NextRequest) {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
     // Test each payment link
-    const results = {};
+    const results: Record<string, { url: string; priceId: string | null; success: boolean }> =
+      {};
 
     for (const [planName, paymentLinkUrl] of Object.entries(PAYMENT_LINKS)) {
       console.log(`\n--- Testing ${planName} ---`);
@@ -112,4 +113,3 @@ export async function GET(request: NextRequest) {
     );
   }
 }
-
