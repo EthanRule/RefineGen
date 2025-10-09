@@ -7,9 +7,9 @@ export default function Footer({ props }: { props: { status: string; session: an
   const { status, session } = props;
 
   return (
-    <footer className="bg-black text-white">
-      <div className="mx-2">
-        <div className="bg-stone-950 rounded-lg shadow-lg border border-stone-700 relative overflow-hidden">
+    <footer className="bg-black text-white h-full flex flex-col">
+      <div className="mx-2 flex-1 flex flex-col">
+        <div className="bg-stone-950 rounded-lg shadow-lg border border-stone-700 relative overflow-hidden flex-1 flex flex-col">
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
             <div
@@ -22,8 +22,8 @@ export default function Footer({ props }: { props: { status: string; session: an
             />
           </div>
 
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="w-3/5 mx-auto px-8 sm:px-12 lg:px-16 py-12 relative z-10 flex-1 flex flex-col justify-between">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
               {/* Brand */}
               <div className="col-span-1 md:col-span-2">
                 <h3 className="text-2xl font-bold mb-4"></h3>

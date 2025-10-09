@@ -12,7 +12,6 @@ export default function Home() {
   const [isFooterOpen, setIsFooterOpen] = useState(false);
   const [showFooter, setShowFooter] = useState(false);
   const [footerVisible, setFooterVisible] = useState(false);
-  const [footerHeight, setFooterHeight] = useState(false);
 
   const handleGetStarted = () => {
     if (status === 'authenticated') {
@@ -26,18 +25,21 @@ export default function Home() {
     if (!isFooterOpen) {
       // Opening footer: start the transition
       setIsFooterOpen(true);
-      // Wait 300ms for START box to move up, then show footer
+      // Wait 500ms for START box to finish transitioning, then give footer space
       setTimeout(() => {
-        setShowFooter(true);
-        setFooterVisible(true);
-      }, 300);
+        setFooterVisible(true); // Give footer space first
+        // Wait a bit more for space to be allocated, then fade in
+        setTimeout(() => {
+          setShowFooter(true); // Show footer after space is allocated
+        }, 100);
+      }, 500);
     } else {
-      // Closing footer: fade out first, then move START box down
+      // Closing footer: fade out first, then deallocate space
       setShowFooter(false);
-      // Wait 500ms for footer to fade out, then move START box down
+      // Wait 500ms for footer to fade out, then deallocate space
       setTimeout(() => {
+        setFooterVisible(false); // Remove footer space after fade
         setIsFooterOpen(false);
-        setFooterVisible(false);
       }, 500);
     }
   };
@@ -50,12 +52,12 @@ export default function Home() {
   }, [isFooterOpen]);
 
   return (
-    <div className="bg-black flex flex-col min-h-screen overflow-hidden">
+    <div className="bg-black flex flex-col h-screen overflow-hidden">
       <Header props={{ status, session }} />
-      <main className="flex justify-center mx-2 mt-2 mb-1">
+      <main className="flex justify-center mx-2 mt-2 flex-1">
         <div
           className={`bg-stone-950 rounded-lg border border-stone-700 w-full flex flex-col transition-all duration-500 ease-in-out relative overflow-hidden ${
-            isFooterOpen ? 'h-[55vh]' : 'h-[calc(100vh-5.5rem)]'
+            isFooterOpen ? 'h-[55vh]' : 'h-full'
           }`}
         >
           {/* Background Image */}
@@ -112,9 +114,11 @@ export default function Home() {
 
       {/* Footer with smooth transitions */}
       <div
-        className={`mt-1 transition-all duration-500 ease-in-out ${
+        className={`mt-2 mb-2 ${
           showFooter ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        } ${footerVisible ? 'h-auto' : 'h-0 overflow-hidden'}`}
+        } ${
+          footerVisible ? 'flex-1' : 'h-0 overflow-hidden'
+        } overflow-x-auto transition-opacity duration-500 ease-in-out`}
       >
         <Footer props={{ status, session }} />
       </div>
