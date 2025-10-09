@@ -67,15 +67,15 @@ export default function ImageGallery({
   if (!shouldRender) return null;
 
   return (
-    <div className="w-1/5">
+    <div className="w-full h-full">
       <div
-        className={`bg-stone-950 rounded-lg border border-stone-700 h-full transition-opacity duration-300 ease-in-out ${
+        className={`bg-stone-950 rounded-lg border border-stone-700 h-full transition-opacity duration-300 ease-in-out w-full ${
           isVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
       >
-        <div className="p-6">
-          <div className="flex items-center justify-center mb-4 w-full">
-            <h2 className="text-xl font-semibold text-white">Image Gallery</h2>
+        <div className="p-6 w-full min-w-0 overflow-hidden">
+          <div className="flex items-center justify-center mb-4 w-full min-w-0">
+            <h2 className="text-xl font-semibold text-white truncate">Image Gallery</h2>
           </div>
 
           <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
@@ -90,7 +90,7 @@ export default function ImageGallery({
                 No images yet. Generate some images to see them here!
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2 w-full min-w-0">
                 {images.map(image => (
                   <div key={image.id}>
                     <div className="aspect-square w-full mb-1 relative">

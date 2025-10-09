@@ -62,6 +62,7 @@ export default function GenClient() {
   );
   const [refinementCount, setRefinementCount] = useState<number>(0);
   const [isGalleryOpen, setIsGalleryOpen] = useState<boolean>(false);
+  const [showGallery, setShowGallery] = useState<boolean>(false);
   const [tokenCount, setTokenCount] = useState<number>(0); // Start with 0, will be fetched
   const [isLoadingTokens, setIsLoadingTokens] = useState<boolean>(true); // Track token loading state
   const [recentImageUrl, setRecentImageUrl] = useState<string | null>(null); // Most recent image for background
@@ -546,8 +547,29 @@ export default function GenClient() {
   };
 
   const handleToggleGallery = () => {
-    setIsGalleryOpen(prev => !prev);
+    if (!isGalleryOpen) {
+      // Opening gallery: start the transition
+      setIsGalleryOpen(true);
+      // Wait 300ms for main content to adjust, then show gallery
+      setTimeout(() => {
+        setShowGallery(true);
+      }, 300);
+    } else {
+      // Closing gallery: fade out first, then close
+      setShowGallery(false);
+      // Wait 500ms for gallery to fade out, then close
+      setTimeout(() => {
+        setIsGalleryOpen(false);
+      }, 500);
+    }
   };
+
+  // Reset showGallery when isGalleryOpen changes to false
+  useEffect(() => {
+    if (!isGalleryOpen) {
+      setShowGallery(false);
+    }
+  }, [isGalleryOpen]);
 
   // Show loading state while checking authentication
   if (status === 'loading') {
@@ -571,8 +593,8 @@ export default function GenClient() {
     <div className="min-h-screen bg-black flex flex-col overflow-y-auto lg:overflow-hidden lg:h-screen">
       <main className="flex-1 flex mx-2 my-2">
         <div
-          className={`bg-stone-950 rounded-lg shadow-lg border border-stone-700 flex flex-col min-h-[calc(100vh-1rem)] lg:max-h-[calc(100vh-1rem)] transition-all duration-300 ease-in-out relative overflow-hidden ${
-            isGalleryOpen ? 'w-4/5 mr-2' : 'w-full'
+          className={`bg-stone-950 rounded-lg shadow-lg border border-stone-700 flex flex-col min-h-[calc(100vh-1rem)] lg:max-h-[calc(100vh-1rem)] transition-all duration-500 ease-in-out relative overflow-hidden ${
+            isGalleryOpen ? 'w-4/5' : 'w-full'
           }`}
         >
           {/* Background Image */}
@@ -631,15 +653,22 @@ export default function GenClient() {
         </div>
 
         {/* Image Gallery Panel */}
-        {isGalleryOpen && (
+        <div
+          className={`${
+            isGalleryOpen ? 'w-1/5 ml-2' : 'w-0 overflow-hidden'
+          } transition-all duration-500 ease-in-out`}
+        >
           <ImageGallery
-            isOpen={isGalleryOpen}
-            onClose={() => setIsGalleryOpen(false)}
+            isOpen={showGallery}
+            onClose={() => {
+              setShowGallery(false);
+              setTimeout(() => setIsGalleryOpen(false), 500);
+            }}
             images={savedImages}
             isLoading={isLoadingImages}
             onRefresh={fetchImages}
           />
-        )}
+        </div>
       </main>
     </div>
   );

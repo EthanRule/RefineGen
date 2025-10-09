@@ -8,9 +8,21 @@ export default function Footer({ props }: { props: { status: string; session: an
 
   return (
     <footer className="bg-black text-white">
-      <div className="mx-2 my-2">
-        <div className="bg-stone-950 rounded-lg shadow-lg border border-stone-700">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="mx-2">
+        <div className="bg-stone-950 rounded-lg shadow-lg border border-stone-700 relative overflow-hidden">
+          {/* Background Image */}
+          <div className="absolute inset-0 z-0">
+            <div
+              className="w-full h-full bg-cover bg-center bg-no-repeat opacity-100"
+              style={{
+                backgroundImage: `url('/background.png')`,
+                filter: 'brightness(0.2)',
+                transform: 'scale(1.1)',
+              }}
+            />
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               {/* Brand */}
               <div className="col-span-1 md:col-span-2">

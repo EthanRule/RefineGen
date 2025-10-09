@@ -17,8 +17,20 @@ export default function Header({ props }: { props: { status: string; session: an
   return (
     <header className="bg-black sticky top-0 z-50">
       <div className="mx-2 mt-2">
-        <div className="bg-stone-950 rounded-lg shadow-lg border border-stone-700">
-          <div className="px-8">
+        <div className="bg-stone-950 rounded-lg shadow-lg border border-stone-700 relative overflow-hidden">
+          {/* Background Image */}
+          <div className="absolute inset-0 z-0">
+            <div
+              className="w-full h-full bg-cover bg-center bg-no-repeat opacity-100"
+              style={{
+                backgroundImage: `url('/background.png')`,
+                filter: 'brightness(0.2)',
+                transform: 'scale(1.1)',
+              }}
+            />
+          </div>
+
+          <div className="px-8 relative z-10">
             <div className="flex justify-between items-center h-14">
               <HeaderLogo />
               <div className="hidden md:flex items-center space-x-4">

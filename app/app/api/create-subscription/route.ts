@@ -61,6 +61,13 @@ const PAYMENT_LINKS = {
   price_4000_gems: 'https://buy.stripe.com/6oU9AUaS3dh8gZpasC2Ry02',
 } as const;
 
+// Fallback: Direct price IDs (you'll need to get these from your Stripe dashboard)
+const DIRECT_PRICE_IDS = {
+  price_400_gems: 'price_400_gems_direct', // Replace with actual price ID
+  price_1800_gems: 'price_1800_gems_direct', // Replace with actual price ID
+  price_4000_gems: 'price_4000_gems_direct', // Replace with actual price ID
+} as const;
+
 // Gem amounts and pricing for each plan
 const SUBSCRIPTION_PLANS = {
   price_400_gems: {
@@ -132,17 +139,24 @@ export async function POST(request: NextRequest) {
     const paymentLinkUrl = PAYMENT_LINKS[priceId as keyof typeof PAYMENT_LINKS];
     console.log('Payment link URL:', paymentLinkUrl);
 
-    const actualPriceId = await getPriceIdFromPaymentLink(paymentLinkUrl);
+    let actualPriceId = await getPriceIdFromPaymentLink(paymentLinkUrl);
+
+    // Fallback: If payment link fails, try direct price ID
+    if (!actualPriceId) {
+      console.log('Payment link failed, trying direct price ID...');
+      actualPriceId = DIRECT_PRICE_IDS[priceId as keyof typeof DIRECT_PRICE_IDS];
+      console.log('Using direct price ID:', actualPriceId);
+    }
 
     if (!actualPriceId) {
-      console.error('Failed to retrieve actual Price ID from payment link:', paymentLinkUrl);
+      console.error('Failed to retrieve actual Price ID from both payment link and direct ID');
       return NextResponse.json(
-        { error: 'Failed to retrieve price ID from payment link' },
+        { error: 'Failed to retrieve price ID. Please check your Stripe configuration.' },
         { status: 500 }
       );
     }
 
-    console.log('Retrieved actual Price ID:', actualPriceId);
+    console.log('Using Price ID:', actualPriceId);
 
     // Get or create user in database
     console.log('Looking up user in database...');
