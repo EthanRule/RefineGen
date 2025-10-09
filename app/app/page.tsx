@@ -24,11 +24,15 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex flex-col">
+    <div className="bg-black flex flex-col min-h-screen">
       <Header props={{ status, session }} />
-      <main className="flex-1 flex justify-center mx-2 my-2 mt-4">
-        <div className="bg-stone-950 rounded-lg border border-stone-700 w-full flex flex-col min-h-[calc(100vh-1rem)]">
-          <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 text-center">
+      <main className="flex justify-center mx-2 mt-2 mb-1">
+        <div
+          className={`bg-stone-950 rounded-lg border border-stone-700 w-full flex flex-col transition-all duration-300 ease-in-out ${
+            isFooterOpen ? 'h-[55vh]' : 'h-[calc(100vh-5.5rem)]'
+          }`}
+        >
+          <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
             <div className="max-w-4xl mx-auto">
               <button
                 onClick={handleGetStarted}
@@ -42,10 +46,10 @@ export default function Home() {
       </main>
 
       {/* Custom Footer Toggle Button */}
-      <div className="fixed bottom-4 right-6 z-50">
+      <div className="fixed bottom-6 right-6 z-50">
         <button
           onClick={handleToggleFooter}
-          className={`p-3 rounded-full transition-all duration-300 ease-in-out ${
+          className={`p-2 rounded-full transition-all duration-300 ease-in-out ${
             isFooterOpen
               ? 'bg-cyan-600 text-white shadow-lg shadow-cyan-400/50'
               : 'bg-stone-700 text-gray-300 hover:bg-stone-600 hover:text-white'
@@ -68,12 +72,16 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Conditional Footer */}
-      {isFooterOpen && (
-        <div className="animate-in slide-in-from-bottom duration-300">
-          <Footer props={{ status, session }} />
-        </div>
-      )}
+      {/* Footer with smooth transitions */}
+      <div
+        className={`mt-1 transition-all duration-300 ease-in-out ${
+          isFooterOpen
+            ? 'opacity-100 translate-y-0 h-auto'
+            : 'opacity-0 translate-y-full pointer-events-none h-0 overflow-hidden'
+        }`}
+      >
+        <Footer props={{ status, session }} />
+      </div>
     </div>
   );
 }
