@@ -1,6 +1,8 @@
 import Stripe from 'stripe';
 import { NextRequest, NextResponse } from 'next/server';
 
+
+
 // Payment links from Stripe Dashboard
 const PAYMENT_LINKS = {
   price_400_gems: 'https://buy.stripe.com/bJebJ2aS3a4W4cD58i2Ry00',

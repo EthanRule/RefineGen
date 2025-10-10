@@ -54,18 +54,11 @@ async function getPriceIdFromPaymentLink(paymentLinkUrl: string): Promise<string
   }
 }
 
-// Payment links from Stripe Dashboard
-const PAYMENT_LINKS = {
-  price_400_gems: 'https://buy.stripe.com/bJebJ2aS3a4W4cD58i2Ry00',
-  price_1800_gems: 'https://buy.stripe.com/14A9AU6BN7WO4cDasC2Ry01',
-  price_4000_gems: 'https://buy.stripe.com/6oU9AUaS3dh8gZpasC2Ry02',
-} as const;
-
-// Fallback: Direct price IDs (you'll need to get these from your Stripe dashboard)
+// Direct price IDs from Stripe Dashboard
 const DIRECT_PRICE_IDS = {
-  price_400_gems: 'price_400_gems_direct', // Replace with actual price ID
-  price_1800_gems: 'price_1800_gems_direct', // Replace with actual price ID
-  price_4000_gems: 'price_4000_gems_direct', // Replace with actual price ID
+  price_400_gems: 'price_1SG1vHJxtYYSN7hpwOJ52x9Q', // 400 gems - $4.99
+  price_1800_gems: 'price_1SG1wHJxtYYSN7hpwOJ52x9Q', // 1800 gems - $19.99
+  price_4000_gems: 'price_1SG1z4JxtYYSN7hp7Ftszmas', // 4000 gems - $39.99
 } as const;
 
 // Gem amounts and pricing for each plan
@@ -134,22 +127,13 @@ export async function POST(request: NextRequest) {
     const plan = SUBSCRIPTION_PLANS[priceId as keyof typeof SUBSCRIPTION_PLANS];
     console.log('Selected plan:', plan);
 
-    // Get the actual Stripe Price ID from the payment link
-    console.log('Retrieving actual Price ID from payment link...');
-    const paymentLinkUrl = PAYMENT_LINKS[priceId as keyof typeof PAYMENT_LINKS];
-    console.log('Payment link URL:', paymentLinkUrl);
-
-    let actualPriceId = await getPriceIdFromPaymentLink(paymentLinkUrl);
-
-    // Fallback: If payment link fails, try direct price ID
-    if (!actualPriceId) {
-      console.log('Payment link failed, trying direct price ID...');
-      actualPriceId = DIRECT_PRICE_IDS[priceId as keyof typeof DIRECT_PRICE_IDS];
-      console.log('Using direct price ID:', actualPriceId);
-    }
+    // Get the direct Stripe Price ID
+    console.log('Using direct Price ID...');
+    const actualPriceId = DIRECT_PRICE_IDS[priceId as keyof typeof DIRECT_PRICE_IDS];
+    console.log('Using direct price ID:', actualPriceId);
 
     if (!actualPriceId) {
-      console.error('Failed to retrieve actual Price ID from both payment link and direct ID');
+      console.error('Failed to retrieve Price ID from configuration');
       return NextResponse.json(
         { error: 'Failed to retrieve price ID. Please check your Stripe configuration.' },
         { status: 500 }
