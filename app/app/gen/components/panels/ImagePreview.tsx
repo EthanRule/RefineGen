@@ -108,7 +108,7 @@ export default function ImagePreview({
 
   return (
     <div
-      className={`rounded-lg h-[40rem] min-h-[600px] max-h-[800px] w-full relative ${
+      className={`rounded-lg h-full w-full relative ${
         imageUrl
           ? 'bg-transparent border-none p-0'
           : 'bg-zinc-900 p-6 border-2 border-dashed border-zinc-700'

@@ -32,8 +32,8 @@ export default function Footer({ props }: { props: { status: string; session: an
               }`}
               style={{
                 backgroundImage: `url('/background.png')`,
-                filter: 'brightness(0.2)',
-                transform: 'scale(1.1)',
+                filter: 'brightness(0.4)',
+                transform: 'scale(1)',
               }}
             />
           </div>

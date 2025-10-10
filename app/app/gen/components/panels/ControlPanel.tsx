@@ -38,13 +38,13 @@ export default function ControlPanel({
   isLoadingTokens = false,
 }: ControlPanelProps) {
   return (
-    <div className="lg:col-span-1 flex flex-col h-full max-h-[calc(100vh-20vh)]">
+    <div className="lg:col-span-1 flex flex-col h-full">
       {/* Top Section: Prompt and Selectors */}
       <div className="flex-1 flex flex-col space-y-8 pr-2 min-h-0">
         <div className="flex-shrink-0">
           <ImagePrompt onPromptChange={onPromptChange} />
         </div>
-        <div className="flex-1 min-h-0 max-h-[50vh] overflow-y-auto">
+        <div className="flex-1 min-h-0">
           <DynamicSectionSelector
             sections={sections}
             selectedAttributes={selectedAttributes}

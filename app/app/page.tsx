@@ -76,13 +76,13 @@ export default function Home() {
           {/* Background Image */}
           <div className="absolute inset-0 z-0">
             <div
-              className={`w-full h-full bg-cover bg-center bg-no-repeat transition-opacity duration-[5000ms] ease-in-out ${
-                isBackgroundLoaded ? 'opacity-100' : 'opacity-0'
+              className={`w-full h-full bg-cover bg-center bg-no-repeat transition-all duration-[10000ms] ease-out ${
+                isBackgroundLoaded ? 'opacity-100 scale-105' : 'opacity-0 scale-100 rotate-1'
               }`}
               style={{
                 backgroundImage: `url('/background.png')`,
-                filter: ' brightness(0.2)',
-                transform: 'scale(1.1)',
+                filter: ' brightness(0.8)',
+                transform: 'scale(1.0)',
               }}
             />
           </div>
