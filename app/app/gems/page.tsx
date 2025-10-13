@@ -2,13 +2,13 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-
+import { useSession } from 'next-auth/react';
 export default function GemsPage() {
   const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
   const [hoveredPackage, setHoveredPackage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<string | null>(null);
-
+  const { data: session } = useSession();
   // Detect mobile screen size
   useEffect(() => {
     const checkScreenSize = () => {
@@ -20,16 +20,16 @@ export default function GemsPage() {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
 
-  // Handle subscription creation
-  const handleSubscribe = async (priceId: string) => {
-    setIsLoading(priceId);
+  // Handle gem purchase
+  const handlePurchase = async (amount: string, email: string) => {
+    setIsLoading(amount);
     try {
-      const response = await fetch('/api/create-subscription', {
+      const response = await fetch('/api/purchase-gems', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ priceId }),
+        body: JSON.stringify({ amount, email }),
       });
 
       const data = await response.json();
@@ -38,12 +38,12 @@ export default function GemsPage() {
         // Redirect to Stripe Checkout
         window.location.href = data.url;
       } else {
-        console.error('Error creating subscription:', data.error);
-        alert('Failed to create subscription. Please try again.');
+        console.error('Error purchasing gems:', data.error);
+        alert('Failed to purchase gems. Please try again.');
       }
     } catch (error) {
-      console.error('Error creating subscription:', error);
-      alert('Failed to create subscription. Please try again.');
+      console.error('Error purchasing gems:', error);
+      alert('Failed to purchase gems. Please try again.');
     } finally {
       setIsLoading(null);
     }
@@ -126,11 +126,11 @@ export default function GemsPage() {
                         Perfect for trying out new features
                       </div>
                       <button
-                        onClick={() => handleSubscribe('price_400_gems')}
-                        disabled={isLoading === 'price_400_gems'}
+                        onClick={() => handlePurchase('400', session?.user?.email || '')}
+                        disabled={isLoading === '400'}
                         className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
                       >
-                        {isLoading === 'price_400_gems' ? 'Loading...' : '$4.99/month'}
+                        {isLoading === '400' ? 'Loading...' : '$4.99'}
                       </button>
                     </div>
                   </div>
@@ -153,11 +153,11 @@ export default function GemsPage() {
                         Great value for regular users
                       </div>
                       <button
-                        onClick={() => handleSubscribe('price_1800_gems')}
-                        disabled={isLoading === 'price_1800_gems'}
+                        onClick={() => handlePurchase('1800', session?.user?.email || '')}
+                        disabled={isLoading === '1800'}
                         className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
                       >
-                        {isLoading === 'price_1800_gems' ? 'Loading...' : '$19.99/month'}
+                        {isLoading === '1800' ? 'Loading...' : '$19.99'}
                       </button>
                     </div>
                   </div>
@@ -175,11 +175,11 @@ export default function GemsPage() {
                         Best value for power users
                       </div>
                       <button
-                        onClick={() => handleSubscribe('price_4000_gems')}
-                        disabled={isLoading === 'price_4000_gems'}
+                        onClick={() => handlePurchase('4000', session?.user?.email || '')}
+                        disabled={isLoading === '4000'}
                         className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-800 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-colors"
                       >
-                        {isLoading === 'price_4000_gems' ? 'Loading...' : '$39.99/month'}
+                        {isLoading === '4000' ? 'Loading...' : '$39.99'}
                       </button>
                     </div>
                   </div>
