@@ -4,6 +4,9 @@ import { authConfig } from '@/lib/auth';
 import ImageGenerator from '../../../lib/services/ImageGenerator';
 import { imageGenerationRateLimit, addRateLimitHeaders } from '../../../lib/rateLimit';
 import { apiLogger, extractUserInfo, generateRequestId } from '../../../lib/logger';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 /**
  * Sanitizes a prompt by removing or escaping potentially problematic characters
@@ -39,6 +42,60 @@ export async function POST(request: NextRequest) {
       requestId,
       userId: userInfo.userId,
       userEmail: userInfo.userEmail,
+    });
+
+    // Check user has sufficient tokens (10 gems for generation)
+    if (!session.user.email) {
+      apiLogger.warn('User email not found in session', { requestId });
+      return NextResponse.json({ error: 'User email not found' }, { status: 400 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { tokens_remaining: true, tokens_used_total: true },
+    });
+
+    if (!user) {
+      apiLogger.warn('User not found in database', {
+        requestId,
+        userEmail: userInfo.userEmail,
+      });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    const tokensRequired = 10;
+    if ((user.tokens_remaining || 0) < tokensRequired) {
+      apiLogger.warn('Insufficient tokens for image generation', {
+        requestId,
+        userId: userInfo.userId,
+        tokens_remaining: user.tokens_remaining || 0,
+        tokens_required: tokensRequired,
+      });
+      return NextResponse.json(
+        {
+          error:
+            'Insufficient gems. You need 10 gems to generate an image. Please purchase more gems.',
+          errorType: 'quota_exceeded',
+          retryable: false,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Deduct tokens before generating image
+    await prisma.user.update({
+      where: { email: session.user.email! },
+      data: {
+        tokens_remaining: (user.tokens_remaining || 0) - tokensRequired,
+        tokens_used_total: (user.tokens_used_total || 0) + tokensRequired,
+      },
+    });
+
+    apiLogger.info('Tokens deducted for image generation', {
+      requestId,
+      userId: userInfo.userId,
+      tokens_deducted: tokensRequired,
+      tokens_remaining: (user.tokens_remaining || 0) - tokensRequired,
     });
 
     // Apply rate limiting

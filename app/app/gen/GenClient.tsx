@@ -4,9 +4,6 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import Header from '../components/Header';
-import Footer from '../components/footer/Footer';
-import LoadingCard from '../components/ui/LoadingCard';
 import ControlPanel from './components/panels/ControlPanel';
 import ImageView from './components/panels/ImageView';
 import GenHeader from './components/panels/GenHeader';
@@ -227,40 +224,8 @@ export default function GenClient() {
     // Generate section options for the prompt
     await generateSectionOptions(imagePrompt.trim());
 
-    // Deduct 3 tokens from database
-    try {
-      const deductResponse = await fetch('/api/deduct-tokens', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'refine',
-          tokensUsed: 3,
-        }),
-      });
-
-      if (deductResponse.ok) {
-        const deductData = await deductResponse.json();
-        setTokenCount(deductData.tokens_remaining);
-      } else {
-        const errorData = await deductResponse.json();
-        console.error('Failed to deduct tokens:', errorData);
-
-        // If insufficient tokens, show error and refresh count
-        if (errorData.error === 'Insufficient tokens') {
-          setError('Insufficient gems. You need 3 gems to refine. Please purchase more gems.');
-          setErrorType('insufficient_tokens');
-          setRefineButtonState('refine');
-          await refreshTokenCount();
-          return;
-        }
-      }
-    } catch (error) {
-      console.error('Error deducting tokens:', error);
-      // Revert the local count if database deduction failed
-      setTokenCount(prev => prev + 3);
-    }
+    // Refresh token count after successful refinement
+    await refreshTokenCount();
 
     // Increment refinement count
     setRefinementCount(prev => prev + 1);
@@ -351,40 +316,8 @@ export default function GenClient() {
       setGeneratedImage(data);
       setGenerateButtonState('generate'); // Reset to generate for next image
 
-      // Deduct 10 tokens from database after successful generation
-      try {
-        const deductResponse = await fetch('/api/deduct-tokens', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'generate',
-            tokensUsed: 10,
-          }),
-        });
-
-        if (deductResponse.ok) {
-          const deductData = await deductResponse.json();
-          setTokenCount(deductData.tokens_remaining);
-        } else {
-          const errorData = await deductResponse.json();
-          console.error('Failed to deduct tokens:', errorData);
-
-          // If insufficient tokens, show error and refresh count
-          if (errorData.error === 'Insufficient tokens') {
-            setError(
-              'Insufficient gems. You need 10 gems to generate an image. Please purchase more gems.'
-            );
-            setErrorType('insufficient_tokens');
-            setGenerateButtonState('generate');
-            await refreshTokenCount();
-            return;
-          }
-        }
-      } catch (error) {
-        console.error('Error deducting tokens:', error);
-      }
+      // Refresh token count after successful generation
+      await refreshTokenCount();
 
       // Save image to S3 and database
       try {
@@ -449,7 +382,6 @@ export default function GenClient() {
 
   const handlePromptChange = (value: string) => {
     setImagePrompt(value);
-    // Reset all state when prompt changes
     setSections([]);
     setSelectedAttributes([]);
     setAttributeSections({});
@@ -481,7 +413,6 @@ export default function GenClient() {
       });
 
       if (!response.ok) {
-        // Try to get error details from response
         try {
           const errorData = await response.json();
           throw new Error(
@@ -494,25 +425,20 @@ export default function GenClient() {
 
       const data = await response.json();
       setSections(data.sections || []);
-
-      // Add the new sections to used sections list
       const newSections = data.sections?.map((section: any) => section.name) || [];
       setUsedSections(prev => {
         const combined = [...prev, ...newSections];
-        return [...new Set(combined)]; // Remove duplicates
+        return [...new Set(combined)];
       });
     } catch (error) {
       console.error('Section options generation failed:', error);
 
-      // Show user-friendly error message for prompt validation issues
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to generate options';
 
-      // Set error state to show to user
       setError(errorMessage);
       setErrorType('invalid_prompt');
 
-      // Clear sections on error
       setSections([]);
     } finally {
       setIsLoadingAttributes(false);
@@ -523,19 +449,16 @@ export default function GenClient() {
   const handleAttributeToggle = (attribute: string) => {
     setSelectedAttributes(prev => {
       if (prev.includes(attribute)) {
-        // Remove attribute and its section mapping
         const newAttributeSections = { ...attributeSections };
         delete newAttributeSections[attribute];
         setAttributeSections(newAttributeSections);
         return prev.filter(attr => attr !== attribute);
       } else {
-        // Find which section this attribute belongs to
         const sectionName = sections.find(section =>
           section.options.includes(attribute)
         )?.name;
 
         if (sectionName) {
-          // Add attribute and track its section
           setAttributeSections(prev => ({
             ...prev,
             [attribute]: sectionName,
@@ -548,30 +471,26 @@ export default function GenClient() {
 
   const handleToggleGallery = () => {
     if (!isGalleryOpen) {
-      // Opening gallery: start the transition
       setIsGalleryOpen(true);
-      // Wait 300ms for main content to adjust, then show gallery
       setTimeout(() => {
         setShowGallery(true);
       }, 300);
     } else {
-      // Closing gallery: fade out first, then close
       setShowGallery(false);
-      // Wait 500ms for gallery to fade out, then close
       setTimeout(() => {
         setIsGalleryOpen(false);
       }, 500);
     }
   };
 
-  // Reset showGallery when isGalleryOpen changes to false
+  // Reset showGallery
   useEffect(() => {
     if (!isGalleryOpen) {
       setShowGallery(false);
     }
   }, [isGalleryOpen]);
 
-  // Show loading state while checking authentication
+  // Loading state
   if (status === 'loading') {
     return (
       <div className="min-h-screen bg-black flex flex-col">
@@ -588,7 +507,6 @@ export default function GenClient() {
     );
   }
 
-  // Show the tailor page for authenticated users
   return (
     <div className="min-h-screen bg-black flex flex-col overflow-y-auto lg:overflow-hidden lg:h-screen">
       <main className="flex-1 flex mx-2 my-2">
@@ -597,7 +515,6 @@ export default function GenClient() {
             isGalleryOpen ? 'w-4/5' : 'w-full'
           }`}
         >
-          {/* Background Image */}
           {recentImageUrl && (
             <div className="absolute inset-0 z-0">
               <div
@@ -606,14 +523,12 @@ export default function GenClient() {
                 }`}
                 style={{
                   backgroundImage: `url(${recentImageUrl})`,
-                  filter: 'blur(20px) brightness(0.15)', // Made darker (0.15 instead of 0.3)
-                  transform: 'scale(1.1)', // Slightly larger to avoid blur edges
+                  filter: 'blur(20px) brightness(0.15)',
+                  transform: 'scale(1.1)',
                 }}
               />
             </div>
           )}
-
-          {/* Content with higher z-index */}
           <div className="relative z-10 flex flex-col h-full">
             <GenHeader
               onToggleGallery={handleToggleGallery}
@@ -651,8 +566,6 @@ export default function GenClient() {
             </div>
           </div>
         </div>
-
-        {/* Image Gallery Panel */}
         <div
           className={`${
             isGalleryOpen ? 'w-1/5 ml-2' : 'w-0 overflow-hidden'

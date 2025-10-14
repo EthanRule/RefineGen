@@ -9,7 +9,6 @@ export const metadata: Metadata = {
 };
 
 export default async function Gen() {
-  // Server-side authentication check
   const session = await getServerSession(authConfig);
 
   if (!session) {

@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authConfig } from '@/lib/auth';
 import OpenAI from 'openai';
+import { PrismaClient } from '@prisma/client';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const prisma = new PrismaClient();
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,6 +14,39 @@ export async function POST(request: NextRequest) {
     if (!session) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
+
+    // Check user has sufficient tokens (3 gems for refinement)
+    if (!session.user.email) {
+      return NextResponse.json({ error: 'User email not found' }, { status: 400 });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email },
+      select: { tokens_remaining: true, tokens_used_total: true },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    const tokensRequired = 3;
+    if ((user.tokens_remaining || 0) < tokensRequired) {
+      return NextResponse.json(
+        {
+          error: 'Insufficient gems. You need 3 gems to refine. Please purchase more gems.',
+        },
+        { status: 400 }
+      );
+    }
+
+    // Deduct tokens before generating options
+    await prisma.user.update({
+      where: { email: session.user.email! },
+      data: {
+        tokens_remaining: (user.tokens_remaining || 0) - tokensRequired,
+        tokens_used_total: (user.tokens_used_total || 0) + tokensRequired,
+      },
+    });
 
     // Parse request body with error handling
     let requestBody;
