@@ -108,13 +108,13 @@ export default function ImagePreview({
 
   return (
     <div
-      className={`rounded-lg h-full w-full relative ${
+      className={`rounded-lg h-full w-full relative overflow-hidden max-h-[60vh] ${
         imageUrl
           ? 'bg-transparent border-none p-0'
           : 'bg-zinc-900 p-6 border-2 border-dashed border-zinc-700'
       }`}
     >
-      <div className="h-full flex items-center justify-center">
+      <div className="h-full max-h-full flex items-center justify-center">
         {error ? (
           <div className="text-center bg-zinc-900 p-6 rounded-lg border-2 border-dashed border-zinc-700">
             <svg
@@ -188,7 +188,7 @@ export default function ImagePreview({
             <img
               src={imageUrl}
               alt="Generated image"
-              className={`w-full h-full object-cover rounded-lg transition-opacity duration-300 ${
+              className={`max-w-full max-h-full object-contain rounded-lg transition-opacity duration-300 ${
                 imageLoaded ? 'opacity-100' : 'opacity-0'
               }`}
               loading="eager"

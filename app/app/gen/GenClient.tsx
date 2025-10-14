@@ -623,7 +623,7 @@ export default function GenClient() {
             />
             <div className="flex flex-1 justify-center min-h-0 py-[5vh] lg:py-[10vh]">
               <div className="w-full lg:w-3/5 h-full px-4 lg:px-0">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full items-stretch h-full max-h-full">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full items-start h-full max-h-full">
                   <ControlPanel
                     onPromptChange={handlePromptChange}
                     onRefine={handleRefine}

@@ -56,7 +56,7 @@ export default function GemsPage() {
           {/* Header with back button */}
           <div className="flex items-center justify-between px-6 py-4 flex-shrink-0">
             <button
-              onClick={() => router.back()}
+              onClick={() => router.push('/gen')}
               className="text-white hover:bg-zinc-800 active:bg-zinc-700 rounded-lg hover:text-gray-300 transition-colors p-1"
               title="Go Back"
             >
