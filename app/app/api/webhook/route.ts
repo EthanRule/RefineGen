@@ -23,7 +23,20 @@ export async function POST(req: NextRequest) {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
       const email = session.customer_details?.email;
-      const priceId = session.line_items?.data?.[0]?.price?.id;
+      console.log('Session data:', {
+        id: session.id,
+        email,
+        line_items: session.line_items,
+        amount_total: session.amount_total,
+        currency: session.currency,
+      });
+
+      // Fetch the full session with line_items expanded
+      const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
+        expand: ['line_items'],
+      });
+
+      const priceId = fullSession.line_items?.data?.[0]?.price?.id;
       console.log('checkout.session.completed', email, priceId);
 
       if (email && priceId) {
