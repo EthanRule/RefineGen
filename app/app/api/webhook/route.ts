@@ -9,7 +9,6 @@ const prisma = new PrismaClient();
 
 export async function POST(req: NextRequest) {
   const payload = await req.text();
-  const res = JSON.parse(payload);
   const sig = req.headers.get('Stripe-Signature');
 
   try {
@@ -24,21 +23,23 @@ export async function POST(req: NextRequest) {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object as Stripe.Checkout.Session;
       const email = session.customer_details?.email;
-      const amount = session.amount_total;
+      const priceId = session.line_items?.data?.[0]?.price?.id;
+      console.log('checkout.session.completed', email, priceId);
 
-      if (email && amount) {
+      if (email && priceId) {
         let gemsAmount = 0;
-        switch (amount) {
-          case 499:
+        switch (priceId) {
+          case 'price_1SHri4JxtYYSN7hpm2fkuQzO':
             gemsAmount = 400;
             break;
-          case 1999:
+          case 'price_1SHrjQJxtYYSN7hp1ojYFsUC':
             gemsAmount = 1800;
             break;
-          case 3999:
+          case 'price_1SHrjxJxtYYSN7hpz32GDuzP':
             gemsAmount = 4000;
             break;
           default:
+            console.error('Unknown price ID: ', priceId);
             gemsAmount = 0;
             break;
         }

@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
       success_url: `${process.env.NEXTAUTH_URL}/gems?success=true`,
       cancel_url: `${process.env.NEXTAUTH_URL}/gems?success=false`,
       customer_email: email,
+      expand: ['line_items'],
     });
 
     return NextResponse.json({ url: session.url });
