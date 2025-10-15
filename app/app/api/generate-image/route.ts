@@ -82,22 +82,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Deduct tokens before generating image
-    await prisma.user.update({
-      where: { email: session.user.email! },
-      data: {
-        tokens_remaining: (user.tokens_remaining || 0) - tokensRequired,
-        tokens_used_total: (user.tokens_used_total || 0) + tokensRequired,
-      },
-    });
-
-    apiLogger.info('Tokens deducted for image generation', {
-      requestId,
-      userId: userInfo.userId,
-      tokens_deducted: tokensRequired,
-      tokens_remaining: (user.tokens_remaining || 0) - tokensRequired,
-    });
-
     // Apply rate limiting
     const ip =
       request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
@@ -198,18 +182,55 @@ export async function POST(request: NextRequest) {
     }
 
     const imageGenerator = new ImageGenerator();
-    const result = await imageGenerator.generateImage({
-      prompt: sanitizedPrompt,
-      model: 'dall-e-3',
-    });
 
-    const response = NextResponse.json(result);
-    apiLogger.info('Image generation completed successfully', {
-      requestId,
-      userId: userInfo.userId,
-      promptLength: sanitizedPrompt.length,
-    });
-    return addRateLimitHeaders(response, ip, { windowMs: 60 * 1000, maxRequests: 5 });
+    try {
+      const result = await imageGenerator.generateImage({
+        prompt: sanitizedPrompt,
+        model: 'dall-e-3',
+      });
+
+      // Deduct tokens only after successful image generation
+      await prisma.user.update({
+        where: { email: session.user.email! },
+        data: {
+          tokens_remaining: (user.tokens_remaining || 0) - tokensRequired,
+          tokens_used_total: (user.tokens_used_total || 0) + tokensRequired,
+        },
+      });
+
+      apiLogger.info('Tokens deducted for successful image generation', {
+        requestId,
+        userId: userInfo.userId,
+        tokens_deducted: tokensRequired,
+        tokens_remaining: (user.tokens_remaining || 0) - tokensRequired,
+      });
+
+      const response = NextResponse.json(result);
+      apiLogger.info('Image generation completed successfully', {
+        requestId,
+        userId: userInfo.userId,
+        promptLength: sanitizedPrompt.length,
+      });
+      return addRateLimitHeaders(response, ip, { windowMs: 60 * 1000, maxRequests: 5 });
+    } catch (imageError) {
+      // Check if it's a content policy violation
+      if (imageError instanceof Error && (imageError as any).errorType === 'content_policy') {
+        apiLogger.info('Content policy violation detected, returning Shrek meme', {
+          requestId,
+          userId: userInfo.userId,
+          originalPrompt: promptToValidate,
+        });
+
+        // Generate Shrek meme instead of throwing error
+        const shrekMeme = await imageGenerator.generateShrekMeme(promptToValidate);
+
+        const response = NextResponse.json(shrekMeme);
+        return addRateLimitHeaders(response, ip, { windowMs: 60 * 1000, maxRequests: 5 });
+      }
+
+      // Re-throw other errors to be handled by the outer catch
+      throw imageError;
+    }
   } catch (error) {
     // Get session again for error logging (in case it wasn't available earlier)
     const session = await getServerSession(authConfig);

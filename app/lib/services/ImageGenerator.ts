@@ -14,6 +14,15 @@ export interface ImageGenerationResult {
   size: string;
 }
 
+export interface ShrekMemeResult {
+  imageUrl: string;
+  prompt: string;
+  timestamp: string;
+  model: string;
+  size: string;
+  isMeme: boolean;
+}
+
 export interface ImageGenerationError {
   type:
     | 'content_policy'
@@ -32,6 +41,17 @@ export default class ImageGenerator {
 
   constructor() {
     this.client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+
+  public async generateShrekMeme(originalPrompt: string): Promise<ShrekMemeResult> {
+    return {
+      imageUrl: '/memes/content-policy.png',
+      prompt: 'Content policy violation - please try a different prompt!',
+      timestamp: new Date().toISOString(),
+      model: 'content-policy-meme',
+      size: '1024x1024',
+      isMeme: true,
+    };
   }
 
   public async generateImage(data: ImageGenerationRequest): Promise<ImageGenerationResult> {

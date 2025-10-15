@@ -8,6 +8,7 @@ interface ImageViewProps {
     timestamp: string;
     model: string;
     size: string;
+    isMeme?: boolean;
   } | null;
   error?: string;
   errorType?: string;

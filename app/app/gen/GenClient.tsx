@@ -18,6 +18,7 @@ interface ImageGenerationResults {
   timestamp: string;
   model: string;
   size: string;
+  isMeme?: boolean;
 }
 
 interface SavedImage {
@@ -344,46 +345,66 @@ export default function GenClient() {
 
       await fetchTokenCount();
 
-      // Save image
-      try {
-        const saveResponse = await fetch('/api/save-image', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            imageUrl: data.imageUrl,
-            prompt: imagePrompt.trim(),
-            attributes: selectedAttributes,
-            filename: `generated_${Date.now()}.png`,
-          }),
-        });
+      // Only save to S3 if it's not a meme
+      if (!data.isMeme) {
+        // Save image
+        try {
+          const saveResponse = await fetch('/api/save-image', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              imageUrl: data.imageUrl,
+              prompt: imagePrompt.trim(),
+              attributes: selectedAttributes,
+              filename: `generated_${Date.now()}.png`,
+            }),
+          });
 
-        if (saveResponse.ok) {
-          setIsFadingOut(true);
-          setTimeout(() => {
-            setIsImageLoaded(false);
-            setRecentImageUrl(data.imageUrl);
-            setIsFadingOut(false);
-            const img = new Image();
-            img.onload = () => {
-              setIsImageLoaded(true);
-            };
-            img.onerror = () => {
+          if (saveResponse.ok) {
+            setIsFadingOut(true);
+            setTimeout(() => {
               setIsImageLoaded(false);
-              throw new Error('Failed to load new background image');
-            };
-            img.src = data.imageUrl;
-          }, 5000);
+              setRecentImageUrl(data.imageUrl);
+              setIsFadingOut(false);
+              const img = new Image();
+              img.onload = () => {
+                setIsImageLoaded(true);
+              };
+              img.onerror = () => {
+                setIsImageLoaded(false);
+                throw new Error('Failed to load new background image');
+              };
+              img.src = data.imageUrl;
+            }, 5000);
 
-          if (isGalleryOpen) {
-            fetchImages();
+            if (isGalleryOpen) {
+              fetchImages();
+            }
+          } else {
+            throw new Error('Failed to save image');
           }
-        } else {
+        } catch (saveError) {
           throw new Error('Failed to save image');
         }
-      } catch (saveError) {
-        throw new Error('Failed to save image');
+      } else {
+        // For memes, just update the background image without saving to S3
+        setIsFadingOut(true);
+        setTimeout(() => {
+          setIsImageLoaded(false);
+          setRecentImageUrl(data.imageUrl);
+          setIsFadingOut(false);
+          const img = new Image();
+          img.onload = () => {
+            setIsImageLoaded(true);
+          };
+          img.onerror = () => {
+            setIsImageLoaded(false);
+            throw new Error('Failed to load new background image');
+          };
+          img.src = data.imageUrl;
+        }, 5000);
       }
     } catch (error) {
       setError(error instanceof Error ? error.message : 'Image generation failed');
