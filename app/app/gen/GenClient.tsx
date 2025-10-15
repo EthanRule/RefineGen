@@ -1,8 +1,11 @@
 'use client';
 
+// This is the main client for the application. This page is where all the magic happens.
+// This is where users interact with the application, refine prompts, and generate images.
+// TODO: Add a custom error handling API for errors.
+
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import ControlPanel from './components/panels/ControlPanel';
 import ImageView from './components/panels/ImageView';
@@ -32,7 +35,6 @@ interface SavedImage {
 
 export default function GenClient() {
   const { data: session, status } = useSession();
-  const router = useRouter();
 
   // State for image generation
   const [imagePrompt, setImagePrompt] = useState<string>('');
@@ -62,11 +64,22 @@ export default function GenClient() {
   const [showGallery, setShowGallery] = useState<boolean>(false);
   const [tokenCount, setTokenCount] = useState<number>(0); // Start with 0, will be fetched
   const [isLoadingTokens, setIsLoadingTokens] = useState<boolean>(true); // Track token loading state
-  const [recentImageUrl, setRecentImageUrl] = useState<string | null>(null); // Most recent image for background
+
+  // Description:
+  // fetchRecentImage is a state machine that fetches the most recent image
+  // under the user's account and updates the background.
+  //
+  // How it works:
+  // First it fetches the recent image url, then it tells the old image to fade out and then
+  // it waits 5 seconds. After 5 seconds it sets the new image url and tells the new image to load.
+  // This state machine works with the css:
+  //   className={`w-full h-full bg-cover bg-center bg-no-repeat transition-opacity duration-[5000ms] ease-in-out ${
+  //   isFadingOut ? 'opacity-0' : isImageLoaded ? 'opacity-100' : 'opacity-0'
+  // }`}
+
+  const [recentImageUrl, setRecentImageUrl] = useState<string | null>(null); // Background image
   const [isImageLoaded, setIsImageLoaded] = useState<boolean>(false); // Track if background image is loaded
   const [isFadingOut, setIsFadingOut] = useState<boolean>(false); // Track if old image is fading out
-
-  // Function to fetch user's most recent image for background
   const fetchRecentImage = async () => {
     try {
       const response = await fetch('/api/recent-image');
@@ -75,42 +88,34 @@ export default function GenClient() {
         const imageUrl = data.recentImage?.publicUrl || null;
 
         if (imageUrl && imageUrl !== recentImageUrl) {
-          // Start fade out of current image
           setIsFadingOut(true);
-
-          // Wait for fade out to complete (5 seconds)
           setTimeout(() => {
-            // Reset loaded state and set new image
             setIsImageLoaded(false);
             setRecentImageUrl(imageUrl);
             setIsFadingOut(false);
-
-            // Preload the new image
             const img = new Image();
             img.onload = () => {
               setIsImageLoaded(true);
             };
             img.onerror = () => {
-              console.error('Failed to load background image');
               setIsImageLoaded(false);
+              throw new Error('Failed to load background image');
             };
             img.src = imageUrl;
-          }, 5000); // Wait 5 seconds for fade out
+          }, 5000);
         } else if (imageUrl === recentImageUrl) {
-          // Same image, just ensure it's loaded
           if (!isImageLoaded) {
             const img = new Image();
             img.onload = () => {
               setIsImageLoaded(true);
             };
             img.onerror = () => {
-              console.error('Failed to load background image');
               setIsImageLoaded(false);
+              throw new Error('Failed to load background image');
             };
             img.src = imageUrl;
           }
         } else {
-          // No image, fade out current one
           setIsFadingOut(true);
           setTimeout(() => {
             setRecentImageUrl(null);
@@ -119,19 +124,14 @@ export default function GenClient() {
           }, 5000);
         }
       } else {
-        console.error('Failed to fetch recent image:', await response.text());
+        throw new Error('Failed to fetch recent image');
       }
     } catch (error) {
-      console.error('Error fetching recent image:', error);
+      // TODO: Add a custom error handling API for errors.
     }
   };
 
-  // Function to refresh token count
-  const refreshTokenCount = async () => {
-    await fetchTokenCount();
-  };
-
-  // Function to fetch user's token count
+  // fetchTokenCount fetches the user's token count from the server.
   const fetchTokenCount = async () => {
     setIsLoadingTokens(true);
     try {
@@ -140,71 +140,42 @@ export default function GenClient() {
         const data = await response.json();
         setTokenCount(data.tokens_remaining || 0);
       } else {
-        console.error('Failed to fetch token count:', await response.text());
+        throw new Error('Failed to fetch token count');
       }
     } catch (error) {
-      console.error('Error fetching token count:', error);
+      // TODO: Add a custom error handling API for errors.
     } finally {
       setIsLoadingTokens(false);
     }
   };
 
-  // Function to fetch user's saved images
+  // fetchImages fetches the user's saved images from the server.
   const fetchImages = async () => {
     setIsLoadingImages(true);
     try {
       const response = await fetch('/api/get-images');
+      console.log('🔍 DEBUG - Fetch images response:', JSON.stringify(response, null, 2));
       if (response.ok) {
         const data = await response.json();
-        console.log('🔍 DEBUG - Fetch images response:', JSON.stringify(data, null, 2));
         setSavedImages(data.images || []);
-        console.log('✅ Images fetched successfully:', data.count);
       } else {
-        console.error('❌ Failed to fetch images:', await response.text());
+        throw new Error('Failed to fetch images');
       }
     } catch (error) {
-      console.error('❌ Error fetching images:', error);
+      // TODO: Add a custom error handling API for errors.
     } finally {
       setIsLoadingImages(false);
     }
   };
 
-  // Fetch token count when component mounts and when session changes
-  useEffect(() => {
-    if (session?.user?.email) {
-      fetchTokenCount();
-      fetchRecentImage(); // Also fetch recent image
-    }
-  }, [session?.user?.email]);
-
-  // Refresh token count when page becomes visible (user might have purchased gems)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden && session?.user?.email) {
-        fetchTokenCount();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [session?.user?.email]);
-
-  // Fetch images when gallery opens
-  useEffect(() => {
-    if (isGalleryOpen) {
-      fetchImages();
-    }
-  }, [isGalleryOpen]);
-
+  // handleRefine send an API request to generate sections and section options.
   const handleRefine = async () => {
-    // Check if user has sufficient tokens (3 gems for refinement)
     if (tokenCount < 3) {
       setError('Insufficient gems. You need 3 gems to refine. Please purchase more gems.');
       setErrorType('insufficient_tokens');
       return;
     }
 
-    // Check refinement limit
     if (refinementCount >= 10) {
       setError('Maximum 10 refinements allowed. Please generate an image to reset.');
       setErrorType('invalid_prompt');
@@ -220,184 +191,7 @@ export default function GenClient() {
     setErrorType('');
     setIsRetryable(false);
     setRefineButtonState('refining');
-
-    // Generate section options for the prompt
-    await generateSectionOptions(imagePrompt.trim());
-
-    // Refresh token count after successful refinement
-    await refreshTokenCount();
-
-    // Increment refinement count
-    setRefinementCount(prev => prev + 1);
-  };
-
-  const handleGenerateImage = async () => {
-    // Check if user has sufficient tokens (10 gems for generation)
-    if (tokenCount < 10) {
-      setError(
-        'Insufficient gems. You need 10 gems to generate an image. Please purchase more gems.'
-      );
-      setErrorType('insufficient_tokens');
-      return;
-    }
-
-    if (!imagePrompt.trim()) {
-      setError('Please enter an image prompt');
-      return;
-    }
-
-    setError('');
-    setErrorType('');
-    setIsRetryable(false);
-    setGeneratedImage(null);
-    setGenerateButtonState('generating');
-
-    try {
-      // Build enhanced prompt with selected attributes and their sections
-      let enhancedPrompt = imagePrompt.trim();
-
-      if (selectedAttributes.length > 0) {
-        // Group attributes by section
-        const attributesBySection: { [key: string]: string[] } = {};
-        selectedAttributes.forEach(attr => {
-          const section = attributeSections[attr];
-          if (section) {
-            if (!attributesBySection[section]) {
-              attributesBySection[section] = [];
-            }
-            attributesBySection[section].push(attr);
-          }
-        });
-
-        // Build descriptive attribute text
-        const attributeDescriptions = Object.entries(attributesBySection)
-          .map(([section, attrs]) => `${section}: ${attrs.join(', ')}`)
-          .join('; ');
-
-        enhancedPrompt = `Generate me an image of ${enhancedPrompt} with the following specifications: ${attributeDescriptions}`;
-      } else {
-        enhancedPrompt = `Generate me an image of ${enhancedPrompt}`;
-      }
-
-      console.log('🚀 Sending enhanced prompt to API:', {
-        originalPrompt: imagePrompt.trim(),
-        selectedAttributes: selectedAttributes,
-        enhancedPrompt: enhancedPrompt,
-      });
-
-      const response = await fetch('/api/generate-image', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          prompt: enhancedPrompt,
-          originalPrompt: imagePrompt.trim(),
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Handle structured error responses
-        if (data.errorType) {
-          setError(data.error);
-          setErrorType(data.errorType);
-          setIsRetryable(data.retryable || false);
-        } else {
-          setError(data.error || `HTTP ${response.status}: ${response.statusText}`);
-          setErrorType('unknown');
-          setIsRetryable(true);
-        }
-        setGenerateButtonState('generate');
-        return;
-      }
-
-      setGeneratedImage(data);
-      setGenerateButtonState('generate'); // Reset to generate for next image
-
-      // Refresh token count after successful generation
-      await refreshTokenCount();
-
-      // Save image to S3 and database
-      try {
-        const saveResponse = await fetch('/api/save-image', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            imageUrl: data.imageUrl,
-            prompt: imagePrompt.trim(),
-            attributes: selectedAttributes,
-            filename: `generated_${Date.now()}.png`,
-          }),
-        });
-
-        if (saveResponse.ok) {
-          const saveData = await saveResponse.json();
-          console.log('✅ Image saved successfully:', saveData);
-
-          // Update recent image for background with crossfade
-          setIsFadingOut(true);
-
-          // Wait for fade out to complete (5 seconds)
-          setTimeout(() => {
-            // Reset loaded state and set new image
-            setIsImageLoaded(false);
-            setRecentImageUrl(data.imageUrl);
-            setIsFadingOut(false);
-
-            // Preload the new image
-            const img = new Image();
-            img.onload = () => {
-              setIsImageLoaded(true);
-            };
-            img.onerror = () => {
-              console.error('Failed to load new background image');
-              setIsImageLoaded(false);
-            };
-            img.src = data.imageUrl;
-          }, 5000); // Wait 5 seconds for fade out
-
-          // Refresh gallery if it's open
-          if (isGalleryOpen) {
-            fetchImages();
-          }
-        } else {
-          console.error('❌ Failed to save image:', await saveResponse.text());
-        }
-      } catch (saveError) {
-        console.error('❌ Error saving image:', saveError);
-        // Don't show error to user - image still generated successfully
-      }
-    } catch (error) {
-      console.error('Image generation failed:', error);
-      setError(error instanceof Error ? error.message : 'Image generation failed');
-      setErrorType('network_error');
-      setIsRetryable(true);
-      setGenerateButtonState('generate');
-    }
-  };
-
-  const handlePromptChange = (value: string) => {
-    setImagePrompt(value);
-    setSections([]);
-    setSelectedAttributes([]);
-    setAttributeSections({});
-    setUsedSections([]);
-    setGeneratedImage(null);
-    setError('');
-    setErrorType('');
-    setIsRetryable(false);
-    setRefinementCount(0);
-  };
-
-  const generateSectionOptions = async (prompt: string) => {
-    if (!prompt.trim()) return;
-
     setIsLoadingAttributes(true);
-    setError('');
 
     try {
       const response = await fetch('/api/generate-section-options', {
@@ -406,7 +200,7 @@ export default function GenClient() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          prompt,
+          prompt: imagePrompt.trim(),
           selectedAttributes: selectedAttributes.length > 0 ? selectedAttributes : undefined,
           usedSections: usedSections.length > 0 ? usedSections : undefined,
         }),
@@ -430,9 +224,13 @@ export default function GenClient() {
         const combined = [...prev, ...newSections];
         return [...new Set(combined)];
       });
-    } catch (error) {
-      console.error('Section options generation failed:', error);
 
+      // Refresh token count after successful refinement
+      await fetchTokenCount();
+
+      // Increment refinement count
+      setRefinementCount(prev => prev + 1);
+    } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to generate options';
 
@@ -469,6 +267,145 @@ export default function GenClient() {
     });
   };
 
+  const handleGenerateImage = async () => {
+    // Check if user has sufficient tokens (10 gems for generation)
+    if (tokenCount < 10) {
+      setError(
+        'Insufficient gems. You need 10 gems to generate an image. Please purchase more gems.'
+      );
+      setErrorType('insufficient_tokens');
+      return;
+    }
+
+    if (!imagePrompt.trim()) {
+      setError('Please enter an image prompt');
+      return;
+    }
+
+    setError('');
+    setErrorType('');
+    setIsRetryable(false);
+    setGeneratedImage(null);
+    setGenerateButtonState('generating');
+
+    try {
+      let enhancedPrompt = imagePrompt.trim();
+
+      if (selectedAttributes.length > 0) {
+        const attributesBySection: { [key: string]: string[] } = {};
+        selectedAttributes.forEach(attr => {
+          const section = attributeSections[attr];
+          if (section) {
+            if (!attributesBySection[section]) {
+              attributesBySection[section] = [];
+            }
+            attributesBySection[section].push(attr);
+          }
+        });
+
+        const attributeDescriptions = Object.entries(attributesBySection)
+          .map(([section, attrs]) => `${section}: ${attrs.join(', ')}`)
+          .join('; ');
+
+        enhancedPrompt = `Generate me an image of ${enhancedPrompt} with the following specifications: ${attributeDescriptions}`;
+      } else {
+        enhancedPrompt = `Generate me an image of ${enhancedPrompt}`;
+      }
+
+      const response = await fetch('/api/generate-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt: enhancedPrompt,
+          originalPrompt: imagePrompt.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (data.errorType) {
+          setError(data.error);
+          setErrorType(data.errorType);
+          setIsRetryable(data.retryable || false);
+        } else {
+          setError(data.error || `HTTP ${response.status}: ${response.statusText}`);
+          setErrorType('unknown');
+          setIsRetryable(true);
+        }
+        setGenerateButtonState('generate');
+        return;
+      }
+
+      setGeneratedImage(data);
+      setGenerateButtonState('generate');
+
+      await fetchTokenCount();
+
+      // Save image
+      try {
+        const saveResponse = await fetch('/api/save-image', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            imageUrl: data.imageUrl,
+            prompt: imagePrompt.trim(),
+            attributes: selectedAttributes,
+            filename: `generated_${Date.now()}.png`,
+          }),
+        });
+
+        if (saveResponse.ok) {
+          setIsFadingOut(true);
+          setTimeout(() => {
+            setIsImageLoaded(false);
+            setRecentImageUrl(data.imageUrl);
+            setIsFadingOut(false);
+            const img = new Image();
+            img.onload = () => {
+              setIsImageLoaded(true);
+            };
+            img.onerror = () => {
+              setIsImageLoaded(false);
+              throw new Error('Failed to load new background image');
+            };
+            img.src = data.imageUrl;
+          }, 5000);
+
+          if (isGalleryOpen) {
+            fetchImages();
+          }
+        } else {
+          throw new Error('Failed to save image');
+        }
+      } catch (saveError) {
+        throw new Error('Failed to save image');
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Image generation failed');
+      setErrorType('network_error');
+      setIsRetryable(true);
+      setGenerateButtonState('generate');
+    }
+  };
+
+  const handlePromptChange = (value: string) => {
+    setImagePrompt(value);
+    setSections([]);
+    setSelectedAttributes([]);
+    setAttributeSections({});
+    setUsedSections([]);
+    setGeneratedImage(null);
+    setError('');
+    setErrorType('');
+    setIsRetryable(false);
+    setRefinementCount(0);
+  };
+
   const handleToggleGallery = () => {
     if (!isGalleryOpen) {
       setIsGalleryOpen(true);
@@ -482,6 +419,21 @@ export default function GenClient() {
       }, 500);
     }
   };
+
+  // Update gem count and background image when session, user, or email changes.
+  useEffect(() => {
+    if (session?.user?.email) {
+      fetchTokenCount();
+      fetchRecentImage();
+    }
+  }, [session?.user?.email]);
+
+  // Fetch images when gallery opens
+  useEffect(() => {
+    if (isGalleryOpen) {
+      fetchImages();
+    }
+  }, [isGalleryOpen]);
 
   // Reset showGallery
   useEffect(() => {

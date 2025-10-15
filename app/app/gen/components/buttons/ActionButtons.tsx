@@ -110,8 +110,6 @@ export default function ActionButtons({
       document.body.removeChild(a);
       window.URL.revokeObjectURL(url);
     }, 100);
-
-    console.log(`Downloaded: ${finalFilename}`);
   };
 
   const handleFilenameChange = (e: React.ChangeEvent<HTMLInputElement>) => {

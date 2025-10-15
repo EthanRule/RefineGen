@@ -38,12 +38,12 @@ export default function GemsPage() {
         // Redirect to Stripe Checkout
         window.location.href = data.url;
       } else {
-        console.error('Error purchasing gems:', data.error);
         alert('Failed to purchase gems. Please try again.');
+        throw new Error('Error purchasing gems:', data.error as Error);
       }
     } catch (error) {
-      console.error('Error purchasing gems:', error);
       alert('Failed to purchase gems. Please try again.');
+      throw new Error('Error purchasing gems:', error as Error);
     } finally {
       setIsLoading(null);
     }

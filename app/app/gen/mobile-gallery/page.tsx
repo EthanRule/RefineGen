@@ -30,14 +30,12 @@ export default function MobileGalleryPage() {
       const response = await fetch('/api/get-images');
       if (response.ok) {
         const data = await response.json();
-        console.log('🔍 DEBUG - Fetch images response:', JSON.stringify(data, null, 2));
         setSavedImages(data.images || []);
-        console.log('✅ Images fetched successfully:', data.count);
       } else {
-        console.error('❌ Failed to fetch images:', await response.text());
+        //TODO: handle error
       }
     } catch (error) {
-      console.error('❌ Error fetching images:', error);
+      throw new Error('❌ Error fetching images:', error as Error);
     } finally {
       setIsLoadingImages(false);
     }
