@@ -395,11 +395,14 @@ export default function GenClient() {
 
   const handlePromptChange = (value: string) => {
     setImagePrompt(value);
+  };
+
+  const handleReset = () => {
+    setImagePrompt('');
     setSections([]);
     setSelectedAttributes([]);
     setAttributeSections({});
     setUsedSections([]);
-    setGeneratedImage(null);
     setError('');
     setErrorType('');
     setIsRetryable(false);
@@ -495,6 +498,7 @@ export default function GenClient() {
                     onPromptChange={handlePromptChange}
                     onRefine={handleRefine}
                     onGenerate={handleGenerateImage}
+                    onReset={handleReset}
                     sections={sections}
                     selectedAttributes={selectedAttributes}
                     onAttributeToggle={handleAttributeToggle}

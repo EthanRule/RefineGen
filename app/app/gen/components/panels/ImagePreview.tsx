@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface ImagePreviewProps {
   imageUrl?: string;
@@ -21,12 +21,14 @@ export default function ImagePreview({
 }: ImagePreviewProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const previousImageUrlRef = useRef<string | undefined>(imageUrl);
 
-  // Reset loading state when imageUrl changes
+  // Reset loading state only when imageUrl actually changes
   useEffect(() => {
-    if (imageUrl) {
+    if (imageUrl && imageUrl !== previousImageUrlRef.current) {
       setImageLoaded(false);
       setImageError(false);
+      previousImageUrlRef.current = imageUrl;
     }
   }, [imageUrl]);
 

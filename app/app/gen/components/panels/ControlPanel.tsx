@@ -2,13 +2,14 @@
 
 import { ImagePrompt } from '../inputs';
 import { DynamicSectionSelector } from '../selectors';
-import { RefineButton, GenerateButton } from '../buttons';
+import { RefineButton, GenerateButton, ResetButton } from '../buttons';
 import { SelectedAttributesCard } from '../cards';
 
 interface ControlPanelProps {
   onPromptChange?: (value: string) => void;
   onRefine?: () => void;
   onGenerate?: () => void;
+  onReset?: () => void;
   sections?: Array<{
     name: string;
     options: string[];
@@ -27,6 +28,7 @@ export default function ControlPanel({
   onPromptChange,
   onRefine,
   onGenerate,
+  onReset,
   sections = [],
   selectedAttributes = [],
   onAttributeToggle,
@@ -57,6 +59,7 @@ export default function ControlPanel({
       {/* Bottom Section: Buttons and Selected Attributes */}
       <div className="flex-shrink-0 pr-2 pt-8">
         <div className="flex gap-3">
+          <ResetButton onReset={onReset} />
           <RefineButton
             onRefine={onRefine}
             refineButtonState={refineButtonState}
