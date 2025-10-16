@@ -133,7 +133,7 @@ export default function Home() {
                     </p>
                   </div>
                   <div className="w-full h-32 bg-zinc-800 rounded-lg border border-zinc-600 flex items-center justify-center">
-                    <span className="text-zinc-400 text-sm">
+                    <span className="text-zinc-300 text-sm">
                       <div>
                         <span className="font-bold">default_prompt:</span> "Create me an image
                         of [<span className="text-cyan-400">user_prompt</span>
@@ -167,16 +167,24 @@ export default function Home() {
                         visibleSteps.includes(4) ? 'opacity-100' : 'opacity-0'
                       }`}
                     >
-                      Selected attributes are added to the prompt
+                      You select specific attributes from each section to refine your image.
                     </p>
                   </div>
                   <div className="w-full h-32 bg-zinc-800 rounded-lg border border-zinc-600 flex items-center justify-center">
                     <span
-                      className={`text-zinc-400 text-sm transition-opacity duration-300 ${
+                      className={`text-zinc-300 text-sm transition-opacity duration-300 ${
                         visibleSteps.includes(4) ? 'opacity-100' : 'opacity-0'
                       }`}
                     >
-                      Diagram placeholder
+                      <div className="text-left px-2">
+                        <div className="text-sm leading-relaxed">
+                          <span className="text-cyan-400">✓ Lighting:</span> bright, soft
+                          <br />
+                          <span className="text-cyan-400">✓ Style:</span> realistic
+                          <br />
+                          <span className="text-cyan-400">✓ Background:</span> simple
+                        </div>
+                      </div>
                     </span>
                   </div>
                 </div>
@@ -208,17 +216,22 @@ export default function Home() {
                         visibleSteps.includes(2) ? 'opacity-100' : 'opacity-0'
                       }`}
                     >
-                      Add additional questions to the default prompt for the LLM.
+                      GPT-4 analyzes your prompt and generates 3 new attribute sections with 5
+                      options each.
                     </p>
                   </div>
                   <div className="w-full h-32 bg-zinc-800 rounded-lg border border-zinc-600 flex items-center justify-center">
                     <span
-                      className={`text-zinc-400 text-sm transition-opacity duration-300 ${
+                      className={`text-zinc-300 text-sm transition-opacity duration-300 ${
                         visibleSteps.includes(2) ? 'opacity-100' : 'opacity-0'
                       }`}
                     >
-                      Generate me section and attributes for the default prompt: [
-                      <span className="text-cyan-400">default_prompt</span>].
+                      <div className="text-left px-2">
+                        <div className="text-sm leading-relaxed">
+                          "Create 3 new attribute sections for:{' '}
+                          <span className="text-cyan-400 font-medium">cat</span>"
+                        </div>
+                      </div>
                     </span>
                   </div>
                 </div>
@@ -247,16 +260,22 @@ export default function Home() {
                         visibleSteps.includes(5) ? 'opacity-100' : 'opacity-0'
                       }`}
                     >
-                      This cycle repeats for up to 10 times
+                      You can repeat steps 2-4 up to 10 times to further refine your image.
                     </p>
                   </div>
                   <div className="w-full h-32 bg-zinc-800 rounded-lg border border-zinc-600 flex items-center justify-center">
                     <span
-                      className={`text-zinc-400 text-sm transition-opacity duration-300 ${
+                      className={`text-zinc-300 text-sm transition-opacity duration-300 ${
                         visibleSteps.includes(5) ? 'opacity-100' : 'opacity-0'
                       }`}
                     >
-                      Diagram placeholder
+                      <div className="text-center px-2">
+                        <div className="text-sm leading-relaxed">
+                          <div className="text-zinc-300">🔄 Steps 2-4 repeat</div>
+                          <div className="text-cyan-400 mt-1">Max 10 iterations</div>
+                          <div className="text-zinc-300 mt-1">3 gems per cycle</div>
+                        </div>
+                      </div>
                     </span>
                   </div>
                 </div>
@@ -288,17 +307,27 @@ export default function Home() {
                         visibleSteps.includes(3) ? 'opacity-100' : 'opacity-0'
                       }`}
                     >
-                      LLM responds with section headers and attributes.
+                      GPT-4 returns structured JSON with section names and attribute options.
                     </p>
                   </div>
                   <div className="w-full h-32 bg-zinc-800 rounded-lg border border-zinc-600 flex items-center justify-center">
                     <span
-                      className={`text-zinc-400 text-sm transition-opacity duration-300 ${
+                      className={`text-zinc-300 text-sm transition-opacity duration-300 ${
                         visibleSteps.includes(3) ? 'opacity-100' : 'opacity-0'
                       }`}
                     >
-                      llm_response: "[[art_style: realistic, 3d, 2d],[color: vibrant, muted,
-                      monochrome],[background: simple, complex, blurred]]"
+                      <div className="text-left px-2">
+                        <div className="text-sm leading-relaxed">
+                          <span className="text-cyan-400">Lighting:</span> bright, soft,
+                          dramatic
+                          <br />
+                          <span className="text-cyan-400">Style:</span> realistic, artistic,
+                          cartoon
+                          <br />
+                          <span className="text-cyan-400">Background:</span> simple, complex,
+                          blurred
+                        </div>
+                      </div>
                     </span>
                   </div>
                 </div>
@@ -327,16 +356,30 @@ export default function Home() {
                         visibleSteps.includes(6) ? 'opacity-100' : 'opacity-0'
                       }`}
                     >
-                      Final prompt is sent to DALL-E 3 for image generation
+                      Your selections are combined into a detailed prompt and sent to DALL-E 3.
                     </p>
                   </div>
                   <div className="w-full h-32 bg-zinc-800 rounded-lg border border-zinc-600 flex items-center justify-center">
                     <span
-                      className={`text-zinc-400 text-sm transition-opacity duration-300 ${
+                      className={`text-zinc-300 text-sm transition-opacity duration-300 ${
                         visibleSteps.includes(6) ? 'opacity-100' : 'opacity-0'
                       }`}
                     >
-                      Diagram placeholder
+                      <div className="text-left px-2">
+                        <div className="text-sm leading-relaxed">
+                          "Generate me an image of{' '}
+                          <span className="text-cyan-400 font-medium">cat</span> with:
+                          <br />
+                          <span className="text-cyan-400">• Lighting:</span> bright, soft
+                          <br />
+                          <span className="text-cyan-400">• Style:</span> realistic
+                          <br />
+                          <span className="text-cyan-400">• Background:</span> simple"
+                        </div>
+                        <div className="text-sm mt-2 text-zinc-300 font-medium">
+                          🎨 → DALL-E 3 API (10 gems)
+                        </div>
+                      </div>
                     </span>
                   </div>
                 </div>

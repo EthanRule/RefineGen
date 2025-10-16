@@ -74,14 +74,6 @@ export default function Footer({ props }: { props: { status: string; session: an
               <div>
                 <h4 className="text-lg font-semibold mb-4">How this works</h4>
                 <ul className="space-y-2">
-                  <li>
-                    <Link
-                      href="/faq/generator"
-                      className="text-gray-400 hover:text-white transition-colors"
-                    >
-                      Image Generator
-                    </Link>
-                  </li>
                   <Link
                     href="/faq/airefinement"
                     className="text-gray-400 hover:text-white transition-colors"
