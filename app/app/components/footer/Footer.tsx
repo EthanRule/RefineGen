@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { signOut } from 'next-auth/react';
+import Link from 'next/link';
 
 export default function Footer({ props }: { props: { status: string; session: any } }) {
   const currentYear = new Date().getFullYear();
@@ -74,15 +75,19 @@ export default function Footer({ props }: { props: { status: string; session: an
                 <h4 className="text-lg font-semibold mb-4">How this works</h4>
                 <ul className="space-y-2">
                   <li>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                    <Link
+                      href="/faq/generator"
+                      className="text-gray-400 hover:text-white transition-colors"
+                    >
                       Image Generator
-                    </a>
+                    </Link>
                   </li>
-                  <li>
-                    <a href="#" className="text-gray-400 hover:text-white transition-colors">
-                      AI Refinement
-                    </a>
-                  </li>
+                  <Link
+                    href="/faq/airefinement"
+                    className="text-gray-400 hover:text-white transition-colors"
+                  >
+                    AI Refinement
+                  </Link>
                 </ul>
               </div>
 
