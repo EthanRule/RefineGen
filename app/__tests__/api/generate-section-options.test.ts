@@ -1,5 +1,26 @@
+// TODO: Slowly read through this file and make sure it works as intended.
 import { NextRequest } from 'next/server';
 import { POST } from '../../app/api/generate-section-options/route';
+
+// Mock NextAuth
+jest.mock('next-auth/next', () => ({
+  getServerSession: jest.fn(),
+}));
+
+// Mock Prisma
+jest.mock('@prisma/client', () => {
+  const mockPrismaInstance = {
+    user: {
+      findUnique: jest.fn(),
+      update: jest.fn(),
+    },
+  };
+
+  return {
+    PrismaClient: jest.fn(() => mockPrismaInstance),
+    mockPrismaInstance, // Export for use in tests
+  };
+});
 
 // Mock the entire OpenAI module
 jest.mock('openai', () => {
@@ -19,6 +40,7 @@ jest.mock('openai', () => {
 
 describe('/api/generate-section-options', () => {
   let mockCreate: jest.Mock;
+  let mockGetServerSession: jest.Mock;
 
   beforeEach(() => {
     // Get the mock function
@@ -26,12 +48,103 @@ describe('/api/generate-section-options', () => {
     mockCreate = openai.mockCreate;
     mockCreate.mockClear();
 
+    // Mock getServerSession
+    mockGetServerSession = require('next-auth/next').getServerSession;
+    mockGetServerSession.mockResolvedValue({
+      user: { email: 'test@example.com' },
+    });
+
+    // Setup Prisma mock
+    const { mockPrismaInstance } = require('@prisma/client');
+    mockPrismaInstance.user.findUnique.mockResolvedValue({
+      id: 'user_123',
+      email: 'test@example.com',
+      tokens_remaining: 1000,
+    });
+    mockPrismaInstance.user.update.mockResolvedValue({});
+
     // Set up environment variable
     process.env.OPENAI_API_KEY = 'test-api-key';
   });
 
   afterEach(() => {
     delete process.env.OPENAI_API_KEY;
+  });
+
+  describe('Authentication', () => {
+    it('should return 401 for unauthenticated user', async () => {
+      mockGetServerSession.mockResolvedValue(null);
+
+      const request = new NextRequest('http://localhost:3000/api/generate-section-options', {
+        method: 'POST',
+        body: JSON.stringify({ prompt: 'A cat' }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(401);
+      expect(data.error).toBe('Authentication required');
+    });
+
+    it('should return 400 for user without email', async () => {
+      mockGetServerSession.mockResolvedValue({
+        user: {}, // No email
+      });
+
+      const request = new NextRequest('http://localhost:3000/api/generate-section-options', {
+        method: 'POST',
+        body: JSON.stringify({ prompt: 'A cat' }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toBe('User email not found');
+    });
+
+    it('should return 404 for user not found in database', async () => {
+      const { mockPrismaInstance } = require('@prisma/client');
+      mockPrismaInstance.user.findUnique.mockResolvedValue(null);
+
+      const request = new NextRequest('http://localhost:3000/api/generate-section-options', {
+        method: 'POST',
+        body: JSON.stringify({ prompt: 'A cat' }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(404);
+      expect(data.error).toBe('User not found');
+    });
+
+    it('should return 400 for insufficient tokens', async () => {
+      const { mockPrismaInstance } = require('@prisma/client');
+      mockPrismaInstance.user.findUnique.mockResolvedValue({
+        id: 'user_123',
+        email: 'test@example.com',
+        tokens_remaining: 2, // Less than required 3
+      });
+
+      const request = new NextRequest('http://localhost:3000/api/generate-section-options', {
+        method: 'POST',
+        body: JSON.stringify({ prompt: 'A cat' }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toBe(
+        'Insufficient gems. You need 3 gems to refine. Please purchase more gems.'
+      );
+    });
   });
 
   describe('Input Validation', () => {
@@ -62,6 +175,48 @@ describe('/api/generate-section-options', () => {
 
       expect(response.status).toBe(400);
       expect(data.error).toBe('Prompt must be 200 characters or less');
+    });
+
+    it('should return 400 for prompt with only repeated characters', async () => {
+      const request = new NextRequest('http://localhost:3000/api/generate-section-options', {
+        method: 'POST',
+        body: JSON.stringify({ prompt: 'aaaaaaaaaaaaaaaaaaaa' }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toBe('Please provide a more descriptive prompt');
+    });
+
+    it('should return 400 for prompt without vowels', async () => {
+      const request = new NextRequest('http://localhost:3000/api/generate-section-options', {
+        method: 'POST',
+        body: JSON.stringify({ prompt: 'bcdfghjklmnpqrstvwxyz' }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toBe('Please provide a more descriptive prompt with actual words');
+    });
+
+    it('should return 400 for prompt without consonants', async () => {
+      const request = new NextRequest('http://localhost:3000/api/generate-section-options', {
+        method: 'POST',
+        body: JSON.stringify({ prompt: 'aeiouaeiouaeiou' }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      const response = await POST(request);
+      const data = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(data.error).toBe('Please provide a more descriptive prompt with actual words');
     });
 
     it('should return 500 for missing OpenAI API key', async () => {
@@ -319,7 +474,7 @@ describe('/api/generate-section-options', () => {
 
       expect(response.status).toBe(500);
       expect(data.error).toBe('Failed to generate section options');
-      expect(data.details).toBe('Invalid section format');
+      expect(data.details).toBe('Invalid section format - no JSON found in response');
     });
 
     it('should handle sections with insufficient options', async () => {
