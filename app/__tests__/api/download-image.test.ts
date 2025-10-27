@@ -13,12 +13,6 @@ jest.mock('@/lib/auth', () => ({
   authConfig: {},
 }));
 
-// Mock rate limiting
-jest.mock('../../../lib/rateLimit', () => ({
-  downloadRateLimit: jest.fn(),
-  addRateLimitHeaders: jest.fn(response => response),
-}));
-
 // Mock global fetch
 global.fetch = jest.fn();
 
@@ -37,10 +31,6 @@ describe('/api/download-image', () => {
 
     // Mock fetch
     mockFetch = global.fetch as jest.Mock;
-
-    // Mock rate limiting - allow all requests by default
-    const { downloadRateLimit } = require('../../../lib/rateLimit');
-    downloadRateLimit.mockReturnValue(null);
   });
 
   describe('Authentication', () => {
@@ -58,27 +48,6 @@ describe('/api/download-image', () => {
 
       expect(response.status).toBe(401);
       expect(data.error).toBe('Authentication required');
-    });
-  });
-
-  describe('Rate Limiting', () => {
-    it('should handle rate limit exceeded', async () => {
-      const { downloadRateLimit } = require('../../../lib/rateLimit');
-      const mockRateLimitResponse = new Response(
-        JSON.stringify({ error: 'Too many requests' }),
-        { status: 429 }
-      );
-      downloadRateLimit.mockReturnValue(mockRateLimitResponse);
-
-      const request = new NextRequest('http://localhost:3000/api/download-image', {
-        method: 'POST',
-        body: JSON.stringify({ imageUrl: 'https://example.com/image.jpg' }),
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      const response = await POST(request);
-
-      expect(response.status).toBe(429);
     });
   });
 

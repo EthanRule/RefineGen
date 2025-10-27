@@ -53,9 +53,8 @@ class Logger {
     };
   }
 
+  // TODO: send this to a logging service
   private log(entry: LogEntry): void {
-    // In production, you might want to send this to a logging service
-    // For now, we'll use console with structured output
     if (process.env.NODE_ENV === 'production') {
       // In production, only log errors and warnings
       if (entry.level === LogLevel.ERROR || entry.level === LogLevel.WARN) {
@@ -154,17 +153,17 @@ export const apiLogger = new Logger('api');
 export const authLogger = new Logger('auth');
 export const imageLogger = new Logger('image-generation');
 
-// Helper function to extract user info from session
-export function extractUserInfo(session: any): { userId?: string; userEmail?: string } {
-  return {
-    userId: session?.user?.id,
-    userEmail: session?.user?.email,
-  };
-}
-
 // Helper function to generate request ID
 export function generateRequestId(): string {
   return (
     Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
   );
+}
+
+// Helper function to extract user info from session
+export function extractUserInfo(session: any) {
+  return {
+    userId: session?.user?.id || undefined,
+    userEmail: session?.user?.email || undefined,
+  };
 }

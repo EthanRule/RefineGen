@@ -14,15 +14,6 @@ export interface ImageGenerationResult {
   size: string;
 }
 
-export interface ShrekMemeResult {
-  imageUrl: string;
-  prompt: string;
-  timestamp: string;
-  model: string;
-  size: string;
-  isMeme: boolean;
-}
-
 export interface ImageGenerationError {
   type:
     | 'content_policy'
@@ -43,18 +34,7 @@ export default class ImageGenerator {
     this.client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   }
 
-  public async generateShrekMeme(originalPrompt: string): Promise<ShrekMemeResult> {
-    return {
-      imageUrl: '/memes/content-policy.png',
-      prompt: 'Content policy violation - please try a different prompt!',
-      timestamp: new Date().toISOString(),
-      model: 'content-policy-meme',
-      size: '1024x1024',
-      isMeme: true,
-    };
-  }
-
-  public async generateImage(data: ImageGenerationRequest): Promise<ImageGenerationResult> {
+  async generateImage(data: ImageGenerationRequest): Promise<ImageGenerationResult> {
     try {
       if (!process.env.OPENAI_API_KEY) {
         throw new Error('OpenAI API key not configured');
@@ -91,7 +71,7 @@ export default class ImageGenerator {
       // Handle specific OpenAI errors gracefully
       const handledError = this.handleOpenAIError(error);
 
-      // Create a custom error with additional context
+      // Convert handledError object into throwable error.
       const customError = new Error(handledError.userMessage);
       (customError as any).errorType = handledError.type;
       (customError as any).retryable = handledError.retryable;
@@ -140,7 +120,7 @@ export default class ImageGenerator {
       return {
         type: 'quota_exceeded',
         message: error.message || 'Quota exceeded',
-        userMessage: 'Image generation quota exceeded. Please check your account limits.',
+        userMessage: 'Image generation quota exceeded. Please contact support.',
         retryable: false,
       };
     }
@@ -156,7 +136,7 @@ export default class ImageGenerator {
         type: 'network_error',
         message: error.message || 'Network error',
         userMessage:
-          'Network connection error. Please check your internet connection and try again.',
+          'Network connection error. RefineGen is experiencing network problems, please contact support.',
         retryable: true,
       };
     }

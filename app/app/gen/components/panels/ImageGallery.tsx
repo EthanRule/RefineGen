@@ -87,7 +87,8 @@ export default function ImageGallery({
               </div>
             ) : images.length === 0 ? (
               <div className="text-center text-stone-400 py-8">
-                No images yet. Generate some images to see them here!
+                No images yet. Generate some images to see them here! Note: Images expire after
+                7 days.
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-2 w-full min-w-0">

@@ -50,6 +50,10 @@ describe('/api/user-tokens', () => {
     });
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   describe('Authentication', () => {
     it('should return 401 for unauthenticated user', async () => {
       mockGetServerSession.mockResolvedValue(null);

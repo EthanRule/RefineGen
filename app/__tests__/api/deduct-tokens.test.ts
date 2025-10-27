@@ -1,5 +1,3 @@
-// TODO: Slowly read through this file and make sure it works as intended.
-
 import { NextRequest } from 'next/server';
 import { POST } from '../../app/api/deduct-tokens/route';
 
@@ -231,11 +229,6 @@ describe('/api/deduct-tokens', () => {
         tokens_remaining: null,
         tokens_used_total: null,
       });
-      mockPrismaInstance.user.update.mockResolvedValue({
-        id: 'user_123',
-        tokens_remaining: 900,
-        tokens_used_total: 100,
-      });
 
       const request = new NextRequest('http://localhost:3000/api/deduct-tokens', {
         method: 'POST',
@@ -246,15 +239,8 @@ describe('/api/deduct-tokens', () => {
       const response = await POST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(200);
-      expect(data.success).toBe(true);
-      expect(mockPrismaInstance.user.update).toHaveBeenCalledWith({
-        where: { id: 'user_123' },
-        data: {
-          tokens_remaining: 900,
-          tokens_used_total: 100,
-        },
-      });
+      expect(response.status).toBe(400);
+      expect(data.error).toBe('Insufficient tokens');
     });
   });
 

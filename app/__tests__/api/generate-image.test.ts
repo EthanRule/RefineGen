@@ -24,12 +24,6 @@ jest.mock('@prisma/client', () => {
   };
 });
 
-// Mock rate limiting
-jest.mock('../../lib/rateLimit', () => ({
-  imageGenerationRateLimit: jest.fn(),
-  addRateLimitHeaders: jest.fn(response => response),
-}));
-
 // Mock the ImageGenerator
 jest.mock('../../lib/services/ImageGenerator');
 const MockedImageGenerator = ImageGenerator as jest.MockedClass<typeof ImageGenerator>;
@@ -42,7 +36,6 @@ describe('/api/generate-image', () => {
     jest.clearAllMocks();
     mockImageGenerator = {
       generateImage: jest.fn(),
-      generateShrekMeme: jest.fn(),
     } as any;
     MockedImageGenerator.mockImplementation(() => mockImageGenerator);
 
@@ -60,10 +53,6 @@ describe('/api/generate-image', () => {
       tokens_remaining: 1000,
     });
     mockPrismaInstance.user.update.mockResolvedValue({});
-
-    // Mock rate limiting - allow all requests by default
-    const { imageGenerationRateLimit } = require('../../lib/rateLimit');
-    imageGenerationRateLimit.mockReturnValue(null);
   });
 
   describe('Authentication', () => {
@@ -314,20 +303,14 @@ describe('/api/generate-image', () => {
   describe('Error Handling', () => {
     it('should handle content policy violations', async () => {
       const prompt = 'inappropriate content';
-      const customError = new Error('Content policy violation');
+      const customError = new Error(
+        'Your prompt contains content that violates our content policy. Please try a different prompt.'
+      );
       (customError as any).errorType = 'content_policy';
       (customError as any).retryable = false;
       (customError as any).originalMessage = 'Content policy violation';
 
       mockImageGenerator.generateImage.mockRejectedValue(customError);
-      mockImageGenerator.generateShrekMeme.mockResolvedValue({
-        imageUrl: '/memes/content-policy.png',
-        prompt: 'Content policy violation - please try a different prompt!',
-        timestamp: new Date().toISOString(),
-        model: 'content-policy-meme',
-        size: '1024x1024',
-        isMeme: true,
-      });
 
       const request = new NextRequest('http://localhost:3000/api/generate-image', {
         method: 'POST',
@@ -338,32 +321,9 @@ describe('/api/generate-image', () => {
       const response = await POST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(200);
-      expect(data.isMeme).toBe(true);
-      expect(data.imageUrl).toBe('/memes/content-policy.png');
-    });
-
-    it('should handle rate limit errors', async () => {
-      // Mock rate limiting to reject the request
-      const { imageGenerationRateLimit } = require('../../lib/rateLimit');
-      const mockRateLimitResponse = {
-        json: () => Promise.resolve({ error: 'Too many requests', retryAfter: 60 }),
-        status: 429,
-        headers: new Map([['Retry-After', '60']]),
-      };
-      imageGenerationRateLimit.mockReturnValue(mockRateLimitResponse);
-
-      const request = new NextRequest('http://localhost:3000/api/generate-image', {
-        method: 'POST',
-        body: JSON.stringify({ prompt: 'Test prompt' }),
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      const response = await POST(request);
-      const data = await response.json();
-
-      expect(response.status).toBe(429);
-      expect(data.error).toBe('Too many requests');
+      expect(response.status).toBe(400);
+      expect(data.error).toBe('Content policy violation');
+      expect(data.errorType).toBe('content_policy');
     });
 
     it('should handle quota exceeded errors', async () => {

@@ -210,31 +210,6 @@ describe('ImageGenerator', () => {
     });
   });
 
-  describe('generateShrekMeme', () => {
-    it('should return Shrek meme result', async () => {
-      const originalPrompt = 'Inappropriate content';
-
-      const result = await imageGenerator.generateShrekMeme(originalPrompt);
-
-      expect(result).toEqual({
-        imageUrl: '/memes/content-policy.png',
-        prompt: 'Content policy violation - please try a different prompt!',
-        timestamp: expect.any(String),
-        model: 'content-policy-meme',
-        size: '1024x1024',
-        isMeme: true,
-      });
-    });
-
-    it('should generate valid timestamp', async () => {
-      const result = await imageGenerator.generateShrekMeme('test');
-
-      const timestamp = new Date(result.timestamp);
-      expect(timestamp).toBeInstanceOf(Date);
-      expect(timestamp.getTime()).toBeLessThanOrEqual(Date.now());
-    });
-  });
-
   describe('Error Handling', () => {
     it('should handle missing API key during generation', async () => {
       delete process.env.OPENAI_API_KEY;

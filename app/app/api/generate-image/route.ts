@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authConfig } from '@/lib/auth';
 import ImageGenerator from '../../../lib/services/ImageGenerator';
-import { imageGenerationRateLimit, addRateLimitHeaders } from '../../../lib/rateLimit';
-import { apiLogger, extractUserInfo, generateRequestId } from '../../../lib/logger';
+import { apiLogger, generateRequestId } from '../../../lib/logger';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
+
+// TODO: rate limiting with redis?
 
 /**
  * Sanitizes a prompt by removing or escaping potentially problematic characters
@@ -37,14 +38,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
-    const userInfo = extractUserInfo(session);
     apiLogger.info('Image generation request started', {
       requestId,
-      userId: userInfo.userId,
-      userEmail: userInfo.userEmail,
+      userId: session.user.id,
+      userEmail: session.user.email,
     });
 
-    // Check user has sufficient tokens (10 gems for generation)
     if (!session.user.email) {
       apiLogger.warn('User email not found in session', { requestId });
       return NextResponse.json({ error: 'User email not found' }, { status: 400 });
@@ -58,7 +57,7 @@ export async function POST(request: NextRequest) {
     if (!user) {
       apiLogger.warn('User not found in database', {
         requestId,
-        userEmail: userInfo.userEmail,
+        userEmail: session.user.email,
       });
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
@@ -67,7 +66,7 @@ export async function POST(request: NextRequest) {
     if ((user.tokens_remaining || 0) < tokensRequired) {
       apiLogger.warn('Insufficient tokens for image generation', {
         requestId,
-        userId: userInfo.userId,
+        userId: session.user.id,
         tokens_remaining: user.tokens_remaining || 0,
         tokens_required: tokensRequired,
       });
@@ -80,19 +79,6 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       );
-    }
-
-    // Apply rate limiting
-    const ip =
-      request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-    const rateLimitResponse = imageGenerationRateLimit(request);
-    if (rateLimitResponse) {
-      apiLogger.warn('Rate limit exceeded for image generation', {
-        requestId,
-        userId: userInfo.userId,
-        ip,
-      });
-      return rateLimitResponse;
     }
 
     // Parse request body with error handling
@@ -200,7 +186,7 @@ export async function POST(request: NextRequest) {
 
       apiLogger.info('Tokens deducted for successful image generation', {
         requestId,
-        userId: userInfo.userId,
+        userId: session.user.id,
         tokens_deducted: tokensRequired,
         tokens_remaining: (user.tokens_remaining || 0) - tokensRequired,
       });
@@ -208,24 +194,26 @@ export async function POST(request: NextRequest) {
       const response = NextResponse.json(result);
       apiLogger.info('Image generation completed successfully', {
         requestId,
-        userId: userInfo.userId,
+        userId: session.user.id,
         promptLength: sanitizedPrompt.length,
       });
-      return addRateLimitHeaders(response, ip, { windowMs: 60 * 1000, maxRequests: 5 });
+      return response;
     } catch (imageError) {
       // Check if it's a content policy violation
       if (imageError instanceof Error && (imageError as any).errorType === 'content_policy') {
-        apiLogger.info('Content policy violation detected, returning Shrek meme', {
+        apiLogger.info('Content policy violation detected, returning error code.', {
           requestId,
-          userId: userInfo.userId,
+          userId: session.user.id,
           originalPrompt: promptToValidate,
         });
 
-        // Generate Shrek meme instead of throwing error
-        const shrekMeme = await imageGenerator.generateShrekMeme(promptToValidate);
-
-        const response = NextResponse.json(shrekMeme);
-        return addRateLimitHeaders(response, ip, { windowMs: 60 * 1000, maxRequests: 5 });
+        return NextResponse.json(
+          {
+            error: 'Content policy violation',
+            errorType: 'content_policy',
+          },
+          { status: 400 }
+        );
       }
 
       // Re-throw other errors to be handled by the outer catch
@@ -234,10 +222,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     // Get session again for error logging (in case it wasn't available earlier)
     const session = await getServerSession(authConfig);
-    const userInfo = extractUserInfo(session);
     apiLogger.error('Image generation API error', error as Error, {
       requestId,
-      userId: userInfo.userId,
+      userId: session?.user.id,
     });
 
     // Check if it's our custom error with additional context

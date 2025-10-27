@@ -26,7 +26,13 @@ describe('/api/purchase-gems', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    // Suppress console.error for tests (errors are expected in error handling tests)
+    jest.spyOn(console, 'error').mockImplementation(() => {});
     mockStripe = require('stripe');
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   describe('Input Validation', () => {
