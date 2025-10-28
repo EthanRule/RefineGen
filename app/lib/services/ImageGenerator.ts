@@ -38,9 +38,7 @@ export default class ImageGenerator {
     try {
       if (!process.env.OPENAI_API_KEY) {
         throw new Error('OpenAI API key not configured');
-      }
-
-      if (!data.prompt || typeof data.prompt !== 'string') {
+      } else if (!data.prompt || typeof data.prompt !== 'string') {
         throw new Error('Prompt is required and must be a string');
       }
 
@@ -67,11 +65,7 @@ export default class ImageGenerator {
       };
     } catch (error) {
       console.error('ImageGenerator error:', error);
-
-      // Handle specific OpenAI errors gracefully
       const handledError = this.handleOpenAIError(error);
-
-      // Convert handledError object into throwable error.
       const customError = new Error(handledError.userMessage);
       (customError as any).errorType = handledError.type;
       (customError as any).retryable = handledError.retryable;

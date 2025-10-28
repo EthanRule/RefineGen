@@ -155,3 +155,4 @@ class Logger {
 export const apiLogger = new Logger('api');
 export const authLogger = new Logger('auth');
 export const imageLogger = new Logger('image-generation');
+export const s3Logger = new Logger('aws-s3');
