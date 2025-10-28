@@ -1,3 +1,7 @@
+// Logging system. This system enables logs to differentiate between
+// parts of the system. e.g. auth, api, and image-generation level
+// warnings errors and so fourth.
+
 export enum LogLevel {
   ERROR = 'error',
   WARN = 'warn',
@@ -148,22 +152,6 @@ class Logger {
   }
 }
 
-// Create logger instances for different services
 export const apiLogger = new Logger('api');
 export const authLogger = new Logger('auth');
 export const imageLogger = new Logger('image-generation');
-
-// Helper function to generate request ID
-export function generateRequestId(): string {
-  return (
-    Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-  );
-}
-
-// Helper function to extract user info from session
-export function extractUserInfo(session: any) {
-  return {
-    userId: session?.user?.id || undefined,
-    userEmail: session?.user?.email || undefined,
-  };
-}

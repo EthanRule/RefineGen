@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authConfig } from '@/lib/auth';
+import { authConfig } from '@/lib/auth/auth';
 import ImageGenerator from '../../../lib/services/ImageGenerator';
-import { apiLogger, generateRequestId } from '../../../lib/logger';
+import { apiLogger } from '../../../lib/utils/logger';
+import { generateRequestId } from '@/lib/utils/generateRequestId';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();

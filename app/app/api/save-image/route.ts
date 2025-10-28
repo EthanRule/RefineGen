@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authConfig } from '@/lib/auth';
+import { authConfig } from '@/lib/auth/auth';
 import { S3Service } from '@/lib/services/S3Service';
 import { PrismaClient } from '@prisma/client';
-import { apiLogger, extractUserInfo, generateRequestId } from '@/lib/logger';
+import { apiLogger } from '@/lib/utils/logger';
+import { generateRequestId } from '@/lib/utils/generateRequestId';
+import { extractUserInfo } from '@/lib/utils/extractUserInfo';
 
 const prisma = new PrismaClient();
 const s3Service = new S3Service();
