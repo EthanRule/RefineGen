@@ -162,12 +162,11 @@ describe('/api/recent-image', () => {
 
   describe('Data Validation', () => {
     it('should only return selected fields', async () => {
-      const mockImage = {
+      const fullImageData = {
         id: 'img_123',
         publicUrl: 'https://example.com/image.jpg',
         prompt: 'A beautiful sunset',
         createdAt: '2024-01-01T00:00:00.000Z',
-        // These fields should not be included
         userId: 'user_123',
         s3Key: 'users/user_123/images/img_123.png',
         s3Bucket: 'test-bucket',
@@ -178,8 +177,20 @@ describe('/api/recent-image', () => {
         updatedAt: '2024-01-01T00:00:00.000Z',
       };
 
+      // Mock returns only the selected fields
       const { mockPrismaInstance } = require('@prisma/client');
-      mockPrismaInstance.image.findFirst.mockResolvedValue(mockImage);
+      mockPrismaInstance.image.findFirst.mockImplementation((args: any) => {
+        // Simulate Prisma select behavior
+        const selectedFields: any = {};
+        if (args.select) {
+          Object.keys(args.select).forEach(key => {
+            if (args.select[key]) {
+              selectedFields[key] = (fullImageData as any)[key];
+            }
+          });
+        }
+        return Promise.resolve(selectedFields);
+      });
 
       const request = new NextRequest('http://localhost:3000/api/recent-image');
       const response = await GET(request);

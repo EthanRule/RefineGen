@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authConfig } from '@/lib/auth';
-import { downloadRateLimit, addRateLimitHeaders } from '../../../lib/rateLimit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,14 +8,6 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authConfig);
     if (!session) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    // Apply rate limiting
-    const ip =
-      request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown';
-    const rateLimitResponse = downloadRateLimit(request);
-    if (rateLimitResponse) {
-      return rateLimitResponse;
     }
 
     const { imageUrl } = await request.json();
@@ -109,7 +100,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Return the image as a blob
-    const response = new NextResponse(imageBuffer, {
+    return new NextResponse(imageBuffer, {
       status: 200,
       headers: {
         'Content-Type': contentType,
@@ -117,8 +108,6 @@ export async function POST(request: NextRequest) {
         'Cache-Control': 'no-cache',
       },
     });
-
-    return addRateLimitHeaders(response, ip, { windowMs: 60 * 1000, maxRequests: 10 });
   } catch (error) {
     console.error('Download proxy error:', error);
     return NextResponse.json(

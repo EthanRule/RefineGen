@@ -293,7 +293,7 @@ describe('/api/download-image', () => {
       const response = await POST(request);
       const data = await response.json();
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(400); // should be 400, why is it returning 429?
       expect(data.error).toBe('File too large. Maximum size is 10MB.');
     });
 

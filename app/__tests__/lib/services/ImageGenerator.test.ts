@@ -110,7 +110,7 @@ describe('ImageGenerator', () => {
           prompt: 'Test prompt',
           model: 'dall-e-3',
         })
-      ).rejects.toThrow('Image generation quota exceeded. Please check your account limits.');
+      ).rejects.toThrow('Image generation quota exceeded. Please contact support.');
     });
 
     it('should handle network errors', async () => {
@@ -126,7 +126,7 @@ describe('ImageGenerator', () => {
           model: 'dall-e-3',
         })
       ).rejects.toThrow(
-        'Network connection error. Please check your internet connection and try again.'
+        'Network connection error. RefineGen is experiencing network problems, please contact support.'
       );
     });
 
