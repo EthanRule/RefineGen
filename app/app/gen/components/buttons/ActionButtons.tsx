@@ -112,6 +112,20 @@ export default function ActionButtons({
     }, 100);
   };
 
+  const handleFilenameFocus = () => {
+    if (filenameRef.current) {
+      let selectionEnd: number = 0;
+      for (let i = 0; i < filename.length; i++) {
+        if (filename[i] === '.') {
+          break;
+        }
+        selectionEnd++;
+      }
+
+      filenameRef.current.setSelectionRange(0, selectionEnd);
+    }
+  };
+
   const handleFilenameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilename(e.target.value);
   };
@@ -123,6 +137,7 @@ export default function ActionButtons({
         type="text"
         value={filename}
         onChange={handleFilenameChange}
+        onClick={handleFilenameFocus}
         className="flex-1 px-2 sm:px-3 py-2 bg-zinc-800 text-white rounded-lg focus:outline-none focus:ring-0 placeholder-gray-400 text-xs sm:text-sm min-w-0"
         placeholder="image.png"
       />
