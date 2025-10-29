@@ -22,6 +22,7 @@ interface ControlPanelProps {
   refinementCount?: number;
   tokenCount?: number;
   isLoadingTokens?: boolean;
+  isGalleryOpen?: boolean;
 }
 
 export default function ControlPanel({
@@ -38,6 +39,7 @@ export default function ControlPanel({
   refinementCount = 0,
   tokenCount = 0,
   isLoadingTokens = false,
+  isGalleryOpen = false,
 }: ControlPanelProps) {
   return (
     <div className="lg:col-span-1 flex flex-col h-full">
@@ -66,12 +68,14 @@ export default function ControlPanel({
             refinementCount={refinementCount}
             disabled={tokenCount < 3}
             tokenCount={tokenCount}
+            isGalleryOpen={isGalleryOpen}
           />
           <GenerateButton
             onGenerate={onGenerate}
             generateButtonState={generateButtonState}
             disabled={tokenCount < 10}
             tokenCount={tokenCount}
+            isGalleryOpen={isGalleryOpen}
           />
         </div>
       </div>

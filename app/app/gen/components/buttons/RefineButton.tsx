@@ -6,6 +6,7 @@ interface RefineButtonProps {
   disabled?: boolean;
   refinementCount?: number;
   tokenCount?: number;
+  isGalleryOpen?: boolean;
 }
 
 export default function RefineButton({
@@ -14,6 +15,7 @@ export default function RefineButton({
   disabled = false,
   refinementCount = 0,
   tokenCount = 0,
+  isGalleryOpen,
 }: RefineButtonProps) {
   const handleRefine = async () => {
     if (refineButtonState === 'refining' || refinementCount >= 10) return;
@@ -73,14 +75,16 @@ export default function RefineButton({
 
     return `${baseClass} bg-cyan-400 hover:bg-cyan-200`;
   };
-
+  // TODO: Make this smoother
   return (
     <div className="flex flex-1 group" title={getTooltipText()}>
       {/* Main Refine Button */}
       <button
         onClick={handleRefine}
         disabled={isDisabled || refineButtonState === 'refining'}
-        className={`flex-1 rounded-l-lg rounded-r-none ${
+        className={`flex-1 rounded-l-lg ${
+          isGalleryOpen ? 'md-rounded-r-lg' : 'rounded-r-none'
+        } ${
           isDisabled || refineButtonState === 'refining'
             ? getButtonClass(true)
             : `group-hover:bg-cyan-200 ${getButtonClass(false)}`
@@ -90,39 +94,41 @@ export default function RefineButton({
       </button>
 
       {/* Gem Cost Button */}
-      <button
-        onClick={handleRefine}
-        disabled={isDisabled || refineButtonState === 'refining'}
-        className={`px-2 py-2 rounded-r-lg transition-colors ${
-          refineButtonState === 'refining'
-            ? 'bg-stone-900 cursor-not-allowed'
-            : 'bg-stone-800 group-hover:bg-stone-700'
-        }`}
-      >
-        <div className="flex items-center space-x-1">
-          <svg
-            className={`w-4 h-4 transition-colors ${
-              refineButtonState === 'refining'
-                ? 'text-red-400'
-                : 'text-green-400 group-hover:text-yellow-400'
-            }`}
-            fill="currentColor"
-            viewBox="0 0 24 24"
-            style={{ transform: 'scaleY(-1)' }}
-          >
-            <path d="M12 2L6 8L12 14L18 8L12 2ZM6 8L12 14L6 20L6 8ZM18 8L12 14L18 20L18 8Z" />
-          </svg>
-          <span
-            className={`text-xs font-semibold transition-colors ${
-              refineButtonState === 'refining'
-                ? 'text-red-400'
-                : 'text-green-400 group-hover:text-yellow-400'
-            }`}
-          >
-            3
-          </span>
-        </div>
-      </button>
+      {!isGalleryOpen && (
+        <button
+          onClick={handleRefine}
+          disabled={isDisabled || refineButtonState === 'refining'}
+          className={`px-2 py-2 rounded-r-lg transition-colors ${
+            refineButtonState === 'refining'
+              ? 'bg-stone-900 cursor-not-allowed'
+              : 'bg-stone-800 group-hover:bg-stone-700'
+          }`}
+        >
+          <div className="flex items-center space-x-1">
+            <svg
+              className={`w-4 h-4 transition-colors ${
+                refineButtonState === 'refining'
+                  ? 'text-red-400'
+                  : 'text-green-400 group-hover:text-yellow-400'
+              }`}
+              fill="currentColor"
+              viewBox="0 0 24 24"
+              style={{ transform: 'scaleY(-1)' }}
+            >
+              <path d="M12 2L6 8L12 14L18 8L12 2ZM6 8L12 14L6 20L6 8ZM18 8L12 14L18 20L18 8Z" />
+            </svg>
+            <span
+              className={`text-xs font-semibold transition-colors ${
+                refineButtonState === 'refining'
+                  ? 'text-red-400'
+                  : 'text-green-400 group-hover:text-yellow-400'
+              }`}
+            >
+              3
+            </span>
+          </div>
+        </button>
+      )}
     </div>
   );
 }

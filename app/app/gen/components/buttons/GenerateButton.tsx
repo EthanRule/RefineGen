@@ -5,6 +5,7 @@ interface GenerateButtonProps {
   generateButtonState?: 'generate' | 'generating';
   disabled?: boolean;
   tokenCount?: number;
+  isGalleryOpen?: boolean;
 }
 
 export default function GenerateButton({
@@ -12,6 +13,7 @@ export default function GenerateButton({
   generateButtonState = 'generate',
   disabled = false,
   tokenCount = 0,
+  isGalleryOpen = false,
 }: GenerateButtonProps) {
   const handleGenerate = async () => {
     if (generateButtonState === 'generating') return;

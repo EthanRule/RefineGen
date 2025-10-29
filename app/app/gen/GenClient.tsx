@@ -4,6 +4,8 @@
 // This is where users interact with the application, refine prompts, and generate images.
 // TODO: Add a custom error handling API for errors.
 
+// TODO: This css needs to be modularized and cleaned up, its so simple, yet so non extensible right now.
+
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useEffect } from 'react';
@@ -529,6 +531,7 @@ export default function GenClient() {
                     refinementCount={refinementCount}
                     tokenCount={tokenCount}
                     isLoadingTokens={isLoadingTokens}
+                    isGalleryOpen={isGalleryOpen}
                   />
                   <ImageView
                     generatedImage={generatedImage}
