@@ -1,9 +1,6 @@
-// TODO: Slowly read through this file and make sure it works as intended.
-
 import { NextRequest } from 'next/server';
 import { GET } from '../../app/api/user-tokens/route';
 
-// Mock Prisma
 jest.mock('@prisma/client', () => {
   const mockPrismaInstance = {
     user: {
@@ -13,16 +10,14 @@ jest.mock('@prisma/client', () => {
 
   return {
     PrismaClient: jest.fn(() => mockPrismaInstance),
-    mockPrismaInstance, // Export for use in tests
+    mockPrismaInstance,
   };
 });
 
-// Mock NextAuth
 jest.mock('next-auth/next', () => ({
   getServerSession: jest.fn(),
 }));
 
-// Mock auth config
 jest.mock('@/lib/auth/auth', () => ({
   authConfig: {},
 }));

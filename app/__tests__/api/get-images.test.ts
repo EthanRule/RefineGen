@@ -1,14 +1,10 @@
-// TODO: Slowly read through this file and make sure it works as intended.
-
 import { NextRequest } from 'next/server';
 import { GET } from '../../app/api/get-images/route';
 
-// Mock NextAuth
 jest.mock('next-auth/next', () => ({
   getServerSession: jest.fn(),
 }));
 
-// Mock Prisma
 jest.mock('@prisma/client', () => {
   const mockPrismaInstance = {
     image: {
@@ -22,11 +18,10 @@ jest.mock('@prisma/client', () => {
 
   return {
     PrismaClient: jest.fn(() => mockPrismaInstance),
-    mockPrismaInstance, // Export for use in tests
+    mockPrismaInstance,
   };
 });
 
-// Mock logger
 jest.mock('../../lib/utils/logger', () => ({
   apiLogger: {
     warn: jest.fn(),
@@ -35,7 +30,6 @@ jest.mock('../../lib/utils/logger', () => ({
   },
 }));
 
-// Mock extractUserInfo
 jest.mock('../../lib/utils/extractUserInfo', () => ({
   extractUserInfo: jest.fn((session: any) => ({
     userId: session?.user?.email ? 'user_123' : undefined,
@@ -43,7 +37,6 @@ jest.mock('../../lib/utils/extractUserInfo', () => ({
   })),
 }));
 
-// Mock generateRequestId
 jest.mock('../../lib/utils/generateRequestId', () => ({
   generateRequestId: jest.fn(() => 'test-request-id'),
 }));
@@ -54,7 +47,6 @@ describe('/api/get-images', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    // Mock getServerSession
     mockGetServerSession = require('next-auth/next').getServerSession;
     mockGetServerSession.mockResolvedValue({
       user: { email: 'test@example.com' },

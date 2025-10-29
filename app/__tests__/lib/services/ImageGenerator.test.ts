@@ -1,8 +1,5 @@
-// TODO: Slowly read through this file and make sure it works as intended.
-
 import ImageGenerator from '../../../lib/services/ImageGenerator';
 
-// Mock OpenAI
 jest.mock('openai', () => {
   const mockGenerate = jest.fn();
   return {
@@ -12,7 +9,7 @@ jest.mock('openai', () => {
         generate: mockGenerate,
       },
     })),
-    mockGenerate, // Export the mock for use in tests
+    mockGenerate,
   };
 });
 
@@ -22,12 +19,8 @@ describe('ImageGenerator', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    // Set up environment variable
     process.env.OPENAI_API_KEY = 'test-api-key';
-
     imageGenerator = new ImageGenerator();
-
     const openai = require('openai');
     mockGenerate = openai.mockGenerate;
   });

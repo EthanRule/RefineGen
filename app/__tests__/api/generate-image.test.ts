@@ -1,15 +1,11 @@
-// TODO: Slowly read through this file and make sure it works as intended.
-
 import { NextRequest } from 'next/server';
 import { POST } from '../../app/api/generate-image/route';
 import ImageGenerator from '../../lib/services/ImageGenerator';
 
-// Mock NextAuth
 jest.mock('next-auth/next', () => ({
   getServerSession: jest.fn(),
 }));
 
-// Mock Prisma
 jest.mock('@prisma/client', () => {
   const mockPrismaInstance = {
     user: {
@@ -20,11 +16,10 @@ jest.mock('@prisma/client', () => {
 
   return {
     PrismaClient: jest.fn(() => mockPrismaInstance),
-    mockPrismaInstance, // Export for use in tests
+    mockPrismaInstance,
   };
 });
 
-// Mock the ImageGenerator
 jest.mock('../../lib/services/ImageGenerator');
 const MockedImageGenerator = ImageGenerator as jest.MockedClass<typeof ImageGenerator>;
 

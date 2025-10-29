@@ -1,6 +1,7 @@
 // Logging system. This system enables logs to differentiate between
 // parts of the system. e.g. auth, api, and image-generation level
-// warnings errors and so fourth.
+// warnings errors and so fourth. This probably could be used more throughly
+// throughout the codebase.
 
 export enum LogLevel {
   ERROR = 'error',

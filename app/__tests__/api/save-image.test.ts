@@ -1,14 +1,10 @@
-// TODO: Slowly read through this file and make sure it works as intended.
-
 import { NextRequest } from 'next/server';
 import { POST } from '../../app/api/save-image/route';
 
-// Mock NextAuth
 jest.mock('next-auth/next', () => ({
   getServerSession: jest.fn(),
 }));
 
-// Mock Prisma
 jest.mock('@prisma/client', () => {
   const mockPrismaInstance = {
     image: {
@@ -21,18 +17,16 @@ jest.mock('@prisma/client', () => {
 
   return {
     PrismaClient: jest.fn(() => mockPrismaInstance),
-    mockPrismaInstance, // Export for use in tests
+    mockPrismaInstance, 
   };
 });
 
-// Mock S3Service
 jest.mock('../../lib/services/S3Service', () => ({
   S3Service: jest.fn().mockImplementation(() => ({
     uploadImage: jest.fn().mockResolvedValue('https://s3.example.com/image.jpg'),
   })),
 }));
 
-// Mock logger
 jest.mock('../../lib/utils/logger', () => ({
   apiLogger: {
     warn: jest.fn(),

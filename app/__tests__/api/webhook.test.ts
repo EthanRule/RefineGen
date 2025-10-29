@@ -1,9 +1,6 @@
-// TODO: Slowly read through this file and make sure it works as intended.
-
 import { NextRequest } from 'next/server';
 import { POST } from '../../app/api/webhook/route';
 
-// Mock Stripe
 jest.mock('stripe', () => {
   const mockWebhooks = {
     constructEvent: jest.fn(),
@@ -32,7 +29,7 @@ jest.mock('@prisma/client', () => {
 
   return {
     PrismaClient: jest.fn(() => mockPrismaInstance),
-    mockPrismaInstance, // Export for use in tests
+    mockPrismaInstance,
   };
 });
 
@@ -73,7 +70,6 @@ describe('/api/webhook', () => {
       },
     });
 
-    // Setup Prisma mock
     const { mockPrismaInstance } = require('@prisma/client');
     mockPrismaInstance.user.findUnique.mockResolvedValue({
       id: 'user_123',
@@ -292,7 +288,6 @@ describe('/api/webhook', () => {
 
       expect(response.status).toBe(200);
       expect(data.received).toBe(true);
-      // Should not update user tokens for unknown price
     });
 
     it('should handle user not found', async () => {

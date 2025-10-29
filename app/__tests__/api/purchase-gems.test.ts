@@ -1,9 +1,6 @@
-// TODO: Slowly read through this file and make sure it works as intended.
-
 import { NextRequest } from 'next/server';
 import { POST } from '../../app/api/purchase-gems/route';
 
-// Mock Stripe
 jest.mock('stripe', () => {
   const mockCheckoutSession = {
     id: 'cs_test_123',

@@ -1,12 +1,10 @@
 import { NextRequest } from 'next/server';
 import { POST } from '../../app/api/deduct-tokens/route';
 
-// Mock NextAuth
 jest.mock('next-auth/next', () => ({
   getServerSession: jest.fn(),
 }));
 
-// Mock Prisma
 jest.mock('@prisma/client', () => {
   const mockPrismaInstance = {
     user: {

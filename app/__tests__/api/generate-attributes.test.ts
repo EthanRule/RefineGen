@@ -1,19 +1,14 @@
-// TODO: Slowly read through this file and make sure it works as intended.
-
 import { NextRequest } from 'next/server';
 import { POST } from '../../app/api/generate-attributes/route';
 
-// Mock NextAuth
 jest.mock('next-auth/next', () => ({
   getServerSession: jest.fn(),
 }));
 
-// Mock auth config
 jest.mock('@/lib/auth/auth', () => ({
   authConfig: {},
 }));
 
-// Mock OpenAI
 jest.mock('openai', () => {
   const mockCreate = jest.fn();
   return {
@@ -25,7 +20,7 @@ jest.mock('openai', () => {
         },
       },
     })),
-    mockCreate, // Export the mock for use in tests
+    mockCreate,
   };
 });
 

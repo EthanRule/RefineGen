@@ -1,19 +1,14 @@
-// TODO: Slowly read through this file and make sure it works as intended.
-
 import { NextRequest } from 'next/server';
 import { POST } from '../../app/api/download-image/route';
 
-// Mock NextAuth
 jest.mock('next-auth/next', () => ({
   getServerSession: jest.fn(),
 }));
 
-// Mock auth config
 jest.mock('@/lib/auth/auth', () => ({
   authConfig: {},
 }));
 
-// Mock global fetch
 global.fetch = jest.fn();
 
 describe('/api/download-image', () => {

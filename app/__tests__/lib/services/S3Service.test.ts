@@ -1,8 +1,5 @@
-// TODO: Slowly read through this file and make sure it works as intended.
-
 import { S3Service } from '../../../lib/services/S3Service';
 
-// Mock AWS SDK
 jest.mock('@aws-sdk/client-s3', () => {
   const mockSend = jest.fn();
   const mockS3Client = jest.fn(() => ({
@@ -18,7 +15,7 @@ jest.mock('@aws-sdk/client-s3', () => {
     PutObjectCommand: mockPutObjectCommand,
     GetObjectCommand: mockGetObjectCommand,
     DeleteObjectCommand: mockDeleteObjectCommand,
-    mockSend, // Export for use in tests
+    mockSend,
   };
 });
 
