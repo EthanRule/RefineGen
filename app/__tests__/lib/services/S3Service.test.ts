@@ -109,17 +109,8 @@ describe('S3Service', () => {
     it('should handle missing environment variables', async () => {
       delete process.env.S3_BUCKET_NAME;
 
-      const mockBuffer = Buffer.from('test-image-data');
-      const mockUserId = 'user123';
-      const mockImageId = 'image123';
-      const mockContentType = 'image/jpeg';
-
-      // Create a new instance after deleting env var
-      const newS3Service = new S3Service();
-
-      await expect(
-        newS3Service.uploadImage(mockUserId, mockImageId, mockBuffer, mockContentType)
-      ).rejects.toThrow();
+      // S3Service constructor should throw immediately when env vars are missing
+      expect(() => new S3Service()).toThrow('Missing required AWS environment variables.');
     });
   });
 

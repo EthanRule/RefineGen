@@ -22,7 +22,7 @@ jest.mock('@prisma/client', () => {
 });
 
 // Mock auth config
-jest.mock('@/lib/auth', () => ({
+jest.mock('@/lib/auth/auth', () => ({
   authConfig: {},
 }));
 

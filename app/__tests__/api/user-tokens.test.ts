@@ -23,7 +23,7 @@ jest.mock('next-auth/next', () => ({
 }));
 
 // Mock auth config
-jest.mock('@/lib/auth', () => ({
+jest.mock('@/lib/auth/auth', () => ({
   authConfig: {},
 }));
 

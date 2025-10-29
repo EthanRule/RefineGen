@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth';
-import { authConfig } from '@/lib/auth';
+import { authConfig } from '@/lib/auth/auth';
 import { redirect } from 'next/navigation';
 import GenClient from './GenClient';
 import type { Metadata } from 'next';

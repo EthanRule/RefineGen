@@ -27,16 +27,24 @@ jest.mock('@prisma/client', () => {
 });
 
 // Mock logger
-jest.mock('../../lib/logger', () => ({
+jest.mock('../../lib/utils/logger', () => ({
   apiLogger: {
     warn: jest.fn(),
     info: jest.fn(),
     error: jest.fn(),
   },
+}));
+
+// Mock extractUserInfo
+jest.mock('../../lib/utils/extractUserInfo', () => ({
   extractUserInfo: jest.fn((session: any) => ({
     userId: session?.user?.email ? 'user_123' : undefined,
     userEmail: session?.user?.email,
   })),
+}));
+
+// Mock generateRequestId
+jest.mock('../../lib/utils/generateRequestId', () => ({
   generateRequestId: jest.fn(() => 'test-request-id'),
 }));
 
@@ -53,7 +61,7 @@ describe('/api/get-images', () => {
     });
 
     // Reset extractUserInfo mock to default behavior
-    const { extractUserInfo } = require('../../lib/logger');
+    const { extractUserInfo } = require('../../lib/utils/extractUserInfo');
     extractUserInfo.mockImplementation((session: any) => ({
       userId: session?.user?.email ? 'user_123' : undefined,
       userEmail: session?.user?.email,
@@ -87,7 +95,7 @@ describe('/api/get-images', () => {
       });
 
       // Mock extractUserInfo to return undefined userId for user without email
-      const { extractUserInfo } = require('../../lib/logger');
+      const { extractUserInfo } = require('../../lib/utils/extractUserInfo');
       extractUserInfo.mockImplementation(() => ({
         userId: undefined,
         userEmail: undefined,

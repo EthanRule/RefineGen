@@ -8,7 +8,8 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// TODO: rate limiting with redis?
+// TODO: rate limiting with redis? do we even need this if they are just
+// spending their tokens?
 
 /**
  * Sanitizes a prompt by removing or escaping potentially problematic characters

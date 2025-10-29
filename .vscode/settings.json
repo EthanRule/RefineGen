@@ -1,1 +1,12 @@
-{}
+{
+  // Force Orta’s Jest extension to run from the Next.js app folder
+  "jest.rootPath": "app",
+
+  // Explicit Jest command
+  "jest.pathToJest": "cd app && npx jest --config jest.config.js",
+
+  // Optional convenience settings
+  "jest.autoRun": "off",
+  "jest.enableInlineErrorMessages": true,
+  "jest.showCoverageOnLoad": false
+}

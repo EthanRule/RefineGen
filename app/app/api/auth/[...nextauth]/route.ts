@@ -1,5 +1,5 @@
-import { authConfig } from "@/lib/auth";
-import NextAuth from "next-auth/next";
+import { authConfig } from '@/lib/auth/auth';
+import NextAuth from 'next-auth/next';
 
 // The `handler` is a function created by calling NextAuth with your authentication configuration.
 // This function handles authentication requests (like sign in, sign out, callback, etc.) for NextAuth.

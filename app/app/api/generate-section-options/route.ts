@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { authConfig } from '@/lib/auth';
+import { authConfig } from '@/lib/auth/auth';
 import OpenAI from 'openai';
 import { PrismaClient } from '@prisma/client';
 
