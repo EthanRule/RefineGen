@@ -61,5 +61,4 @@ DATABASE_URL=
 
 7. If you would like to run the tests, run: `npm test`
 
-Feel free to use and distribute this code without the need for credit. This is essentially a
-OpenAI dalle-3 image generation SaaS with all the boilerplate done for you.sssss
+Feel free to use and distribute this code without the need for credit.
