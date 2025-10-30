@@ -3,11 +3,11 @@
 import { useState, useRef, useEffect } from 'react';
 
 interface ImagePromptProps {
+  value?: string;
   onPromptChange?: (value: string) => void;
 }
 
-export default function ImagePrompt({ onPromptChange }: ImagePromptProps) {
-  const [value, setValue] = useState('');
+export default function ImagePrompt({ value = '', onPromptChange }: ImagePromptProps) {
   const [error, setError] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -22,7 +22,6 @@ export default function ImagePrompt({ onPromptChange }: ImagePromptProps) {
       setError('');
     }
 
-    setValue(newValue);
     onPromptChange?.(newValue);
 
     // Calculate target height
@@ -46,7 +45,7 @@ export default function ImagePrompt({ onPromptChange }: ImagePromptProps) {
       const initialHeight = Math.max(textarea.scrollHeight, 40); // Ensure at least 40px
       textarea.style.height = `${initialHeight}px`;
     }
-  }, []);
+  }, [value]);
 
   const getCharacterCountColor = () => {
     const remaining = 200 - value.length;

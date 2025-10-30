@@ -75,7 +75,7 @@ export default function RefineButton({
 
     return `${baseClass} bg-cyan-400 hover:bg-cyan-200`;
   };
-  // TODO: Make this smoother
+  // TODO: Make this smoother right now when the gallery closes it snaps back open.
   return (
     <div className="flex flex-1 group" title={getTooltipText()}>
       {/* Main Refine Button */}

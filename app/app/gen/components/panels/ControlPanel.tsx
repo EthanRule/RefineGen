@@ -6,6 +6,7 @@ import { RefineButton, GenerateButton, ResetButton } from '../buttons';
 import { SelectedAttributesCard } from '../cards';
 
 interface ControlPanelProps {
+  promptValue?: string;
   onPromptChange?: (value: string) => void;
   onRefine?: () => void;
   onGenerate?: () => void;
@@ -26,6 +27,7 @@ interface ControlPanelProps {
 }
 
 export default function ControlPanel({
+  promptValue,
   onPromptChange,
   onRefine,
   onGenerate,
@@ -46,7 +48,7 @@ export default function ControlPanel({
       {/* Top Section: Prompt and Selectors */}
       <div className="flex-1 flex flex-col space-y-8 pr-2 min-h-0">
         <div className="flex-shrink-0">
-          <ImagePrompt onPromptChange={onPromptChange} />
+          <ImagePrompt value={promptValue} onPromptChange={onPromptChange} />
         </div>
         <div className="flex-1 min-h-0">
           <DynamicSectionSelector

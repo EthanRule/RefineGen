@@ -15,16 +15,16 @@ export default function ResetButton({ onReset, disabled = false }: ResetButtonPr
     <button
       onClick={handleReset}
       disabled={disabled}
-      className={`px-3 py-2 rounded-lg transition-all duration-200 flex items-center justify-center ${
+      className={`px-3 py-2 rounded-lg transition-all duration-200 border-zinc-700 border flex items-center justify-center ${
         disabled
-          ? 'bg-zinc-700 cursor-not-allowed opacity-50'
-          : 'bg-zinc-700 hover:bg-zinc-600 active:bg-zinc-500 active:scale-100 hover:scale-105'
+          ? 'bg-zinc-800 cursor-not-allowed opacity-50'
+          : 'bg-zinc-800 hover:bg-zinc-700 active:bg-zinc-500 active:scale-100'
       }`}
       title="Reset prompt and refinements"
     >
       <svg
         className={`w-4 h-4 transition-transform duration-200 ${
-          disabled ? 'text-stone-500' : 'text-stone-300 hover:text-white'
+          disabled ? 'text-zinc-200' : 'text-white'
         }`}
         fill="none"
         viewBox="0 0 24 24"

@@ -421,6 +421,8 @@ export default function GenClient() {
   };
 
   const handleReset = () => {
+    //Alert users refinements will be cleaered.
+
     setImagePrompt('');
     setSections([]);
     setSelectedAttributes([]);
@@ -467,7 +469,6 @@ export default function GenClient() {
       setShowGallery(false);
     }
   }, [isGalleryOpen]);
-
   // Loading state
   if (status === 'loading') {
     return (
@@ -518,6 +519,7 @@ export default function GenClient() {
               <div className="w-full lg:w-3/5 h-full px-4 lg:px-0">
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full items-start h-full max-h-full">
                   <ControlPanel
+                    promptValue={imagePrompt}
                     onPromptChange={handlePromptChange}
                     onRefine={handleRefine}
                     onGenerate={handleGenerateImage}
