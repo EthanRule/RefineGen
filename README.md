@@ -4,6 +4,22 @@
 
 ### Core Features
 
+#### Application client for refining prompts using an OpenAI feedback loop, 
+#### storage with AWS S3, and image generation with OpenAI Dalle-3.
+![generating](/app/public/docs/generating.png)
+![dashboard](/app/public/docs/dashboard.png)
+![gallery](/app/public/docs/gallery.png)
+![mobile](/app/public/docs/mobile.png)
+
+#### Payment handling with Stripe.
+![purchase](/app/public/docs/purchase.png)
+![checkout](/app/public/docs/checkout.png)
+
+# Homepage with NextAuth authentication, storing users in a PostgreSQL table.
+![homepage](/app/public/docs/homepage.png)
+![footer](/app/public/docs/footer.png)
+![auth](/app/public/docs/auth.png)
+
 ### Running the code.
 
 Please follow the instructions below to build and run this project:
