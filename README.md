@@ -4,8 +4,6 @@
 
 ### Core Features
 
-
-
 ### Running the code.
 
 Please follow the instructions below to build and run this project:
@@ -37,15 +35,16 @@ STRIPE_PUBLIC_KEY=
 ```
 
 Then, in an .env.local file, place the
+
 ```
 DATABASE_URL=
 ```
 
-5. From the app directory run: ```npm install```
+5. From the app directory run: `npm install`
 
-6. From the app directory, run: ```npm run dev```
+6. From the app directory, run: `npm run dev`
 
-7. If you would like to run the tests, run: ```npm test```
+7. If you would like to run the tests, run: `npm test`
 
-Feel free to use and distribute this code without the need for credit. This is essentially a 
-OpenAI dalle-3 image generation SaaS with all the boilerplate done for you.
+Feel free to use and distribute this code without the need for credit. This is essentially a
+OpenAI dalle-3 image generation SaaS with all the boilerplate done for you.sssss
