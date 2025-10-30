@@ -1,8 +1,7 @@
 # RefineGen
+#### An image generator with AI context assistance.
 
-## An image generator with AI context assistance.
-
-### Core Features
+## Core Features
 
 #### Application client for refining prompts using an OpenAI feedback loop, 
 #### storage with AWS S3, and image generation with OpenAI Dalle-3.
@@ -15,7 +14,7 @@
 ![purchase](/app/public/docs/purchase.png)
 ![checkout](/app/public/docs/checkout.png)
 
-# Homepage with NextAuth authentication, storing users in a PostgreSQL table.
+#### Homepage with NextAuth authentication, storing users in a PostgreSQL table.
 ![homepage](/app/public/docs/homepage.png)
 ![footer](/app/public/docs/footer.png)
 ![auth](/app/public/docs/auth.png)
