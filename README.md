@@ -1,23 +1,29 @@
 # RefineGen
-#### An image generator with AI context assistance.
+#### Image generator with AI context assistance. [link!](https://www.refinegen.com/)
 
 ## Core Features
 
-#### Application client for refining prompts using an OpenAI feedback loop, 
-#### storage with AWS S3, and image generation with OpenAI Dalle-3.
+#### Application client for refining prompts using an OpenAI feedback loop and image generation with OpenAI Dalle-3.
 ![generating](/app/public/docs/generating.png)
 ![dashboard](/app/public/docs/dashboard.png)
+
+#### Storage with AWS S3.
 ![gallery](/app/public/docs/gallery.png)
+
+#### Mobile first design 🤙
 ![mobile](/app/public/docs/mobile.png)
 
 #### Payment handling with Stripe.
 ![purchase](/app/public/docs/purchase.png)
 ![checkout](/app/public/docs/checkout.png)
 
-#### Homepage with NextAuth authentication, storing users in a PostgreSQL table.
+#### Homepage with NextAuth authentication and PostgreSQL database.
 ![homepage](/app/public/docs/homepage.png)
 ![footer](/app/public/docs/footer.png)
 ![auth](/app/public/docs/auth.png)
+
+#### 150+ Tests mocking inputs for various API's and basic server logic tests.
+![auth](/app/public/docs/tests.png)
 
 ### Running the code.
 
