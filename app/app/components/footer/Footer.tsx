@@ -46,7 +46,7 @@ export default function Footer({ props }: { props: { status: string; session: an
                 <h3 className="text-2xl font-bold mb-4"></h3>
                 <div className="flex space-x-4">
                   <a
-                    href="https://github.com/EthanRule"
+                    href="https://github.com/EthanRule/RefineGen"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gray-400 hover:text-white transition-colors"
